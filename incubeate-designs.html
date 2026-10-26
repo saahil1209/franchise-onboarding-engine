@@ -26,6 +26,8 @@
   a.card:hover { border-color: var(--accent); }
   a.card:active { transform: scale(0.99); }
   a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  a.card.wide { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  @media (max-width: 900px) { a.card.wide { grid-template-columns: minmax(0, 1fr); } }
   .shot { aspect-ratio: 16 / 10; max-width: 100%; background: var(--line); overflow: hidden; }
   .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; }
   .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -41,7 +43,7 @@
 
 <div class="wrap">
   <h1>InCubeAte design options</h1>
-  <p class="lede">Six working screens for the franchise expansion team, each running the real decision engine on the 42-applicant test file: Karnataka territories, competing applicants, holds, flags and onboarding plans. Every figure is computed live in the page, so the six agree with each other and with the app.</p>
+  <p class="lede">Seven working screens for the franchise expansion team, each running the real decision engine on the 42-applicant test file: Karnataka territories, competing applicants, holds, flags and onboarding plans. Every figure is computed live in the page, so the six agree with each other and with the app.</p>
   <div class="facts" aria-label="Test data used by every screen">
     <div><b>42</b><span>applications</span></div>
     <div><b>8</b><span>territories</span></div>
@@ -82,6 +84,15 @@
     <a class="card" href="renders/apple/3-today.html">
       <div class="shot"><img src="renders/apple/screens/3-today-light.png" alt="iPhone-style Today screen with widgets for slots, pipeline and scores"></div>
       <div class="body"><h3>3 · iPhone Today</h3><p>Widgets for slots, the pipeline and scores, with a card carousel of applicants who need a person.</p><span class="try">Try: <b>scroll, swipe the Needs a person cards</b></span><span class="open">Open the screen</span></div>
+    </a>
+  </div>
+
+  <h2>Glass map</h2>
+  <p class="family-note">A frosted-glass overview over a map of the seven cities. Panel shadows follow your cursor like a light source, and the map responds as you move across it.</p>
+  <div class="grid">
+    <a class="card wide" href="renders/glass/index.html">
+      <div class="shot"><img src="renders/glass/screens/glass-desktop.png" alt="Frosted glass panels over a map of seven Karnataka cities, with city markers sized by applications and rings showing slots filled"></div>
+      <div class="body"><h3>Glass map</h3><p>City markers are sized by applications, with rings showing slots filled; Bengaluru's open slot is outlined in red. Click a city to see its territories, slots and ranked contenders.</p><span class="try">Try: <b>move the cursor across the map, hover a queue row to find its city, click Mysuru</b></span><span class="open">Open the screen</span></div>
     </a>
   </div>
 
