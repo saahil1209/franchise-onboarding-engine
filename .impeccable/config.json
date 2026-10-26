@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "incubeate-designs.html"
+        ],
+        "createdAt": "2026-10-26T15:10:23.853Z",
+        "reason": "Claude measured the rendered gallery in both themes: lowest text contrast 7.39:1 dark, 5.89:1 light; static scan pairs one theme's text with the other's surface"
+      }
+    ]
+  }
+}

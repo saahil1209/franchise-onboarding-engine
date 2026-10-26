@@ -1,0 +1,89 @@
+<title>InCubeAte Design Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Layout: a short header with the shared data, then two rows of three cards, one row per design family. */
+  :root {
+    --bg: #f3f5f4; --surface: #ffffff; --fg: #141716; --muted: #59605d; --line: #dfe4e1; --accent: #1b6c80;
+    --sans: "IBM Plex Sans", -apple-system, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0f1211; --surface: #181c1b; --fg: #eef2f0; --muted: #a3aca8; --line: #2a302e; --accent: #5fb8cc; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #0f1211; --surface: #181c1b; --fg: #eef2f0; --muted: #a3aca8; --line: #2a302e; --accent: #5fb8cc; color-scheme: dark; }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 56px; }
+  h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; }
+  .lede { color: var(--muted); max-width: 60ch; margin: 0 0 18px; }
+  p { text-wrap: pretty; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 30px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .facts div { display: flex; flex-direction: column; }
+  .facts b { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .facts span { color: var(--muted); font-size: 13px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .family-note { color: var(--muted); margin: 0 0 14px; max-width: 72ch; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 36px; }
+  a.card { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; color: inherit; text-decoration: none; transition: border-color 120ms, transform 120ms; }
+  a.card:hover { border-color: var(--accent); }
+  a.card:active { transform: scale(0.99); }
+  a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .shot { aspect-ratio: 16 / 10; max-width: 100%; background: var(--line); overflow: hidden; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; }
+  .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .body h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .body p { margin: 0; color: var(--muted); font-size: 14px; }
+  .open { margin-top: 6px; color: var(--accent); font-weight: 600; font-size: 14px; }
+  .try { font-size: 13px; color: var(--muted); }
+  .try b { color: var(--fg); font-weight: 500; }
+  footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  @media (prefers-reduced-motion: reduce) { a.card { transition: none; } a.card:active { transform: none; } }
+</style>
+
+<div class="wrap">
+  <h1>InCubeAte design options</h1>
+  <p class="lede">Six working screens for the franchise expansion team, each running the real decision engine on the 42-applicant test file: Karnataka territories, competing applicants, holds, flags and onboarding plans. Every figure is computed live in the page, so the six agree with each other and with the app.</p>
+  <div class="facts" aria-label="Test data used by every screen">
+    <div><b>42</b><span>applications</span></div>
+    <div><b>8</b><span>territories</span></div>
+    <div><b>9 of 10</b><span>slots allocated</span></div>
+    <div><b>16</b><span>need a person</span></div>
+    <div><b>8</b><span>approved</span></div>
+    <div><b>1</b><span>possible agent-payment fraud</span></div>
+  </div>
+
+  <h2>Dashboard styles</h2>
+  <p class="family-note">Built with the taste skill's app-screen rules: colour only on data, flat surfaces, one finding stated first.</p>
+  <div class="grid">
+    <a class="card" href="renders/option-a-ledger.html">
+      <div class="shot"><img src="renders/screens/option-a-ledger-desktop.jpg" alt="Ledger dashboard with a slot board per territory and a queue of applicants needing a person"></div>
+      <div class="body"><h3>A · Ledger</h3><p>A quiet report. The slot board shows every territory's slots as squares; the open TER-02 slot is in red.</p><span class="try">Look at: <b>slot board, score bands, hold and waitlist reasons</b></span><span class="open">Open the screen</span></div>
+    </a>
+    <a class="card" href="renders/option-b-sheet.html">
+      <div class="shot"><img src="renders/screens/option-b-sheet-desktop.jpg" alt="Work queue of applications with status tabs, row actions and a slots-by-territory rail"></div>
+      <div class="body"><h3>B · Framed sheet</h3><p>A work queue for long sessions: status tabs, a one-click action on each row, slots and cities on the side.</p><span class="try">Look at: <b>row actions, territory plan bars, training languages</b></span><span class="open">Open the screen</span></div>
+    </a>
+    <a class="card" href="renders/option-c-night.html">
+      <div class="shot"><img src="renders/screens/option-c-night-desktop.jpg" alt="Dark overview with a rank strip of applicant scores per territory"></div>
+      <div class="body"><h3>C · Night</h3><p>A dark overview whose rank strip plots every eligible applicant by score, territory by territory.</p><span class="try">Look at: <b>rank strip, where applications ended up, onboarding starts</b></span><span class="open">Open the screen</span></div>
+    </a>
+  </div>
+
+  <h2>Apple styles</h2>
+  <p class="family-note">Built with the Apple design skill: system type, translucent bars, spring motion you can grab and redirect. Each follows your light or dark setting.</p>
+  <div class="grid">
+    <a class="card" href="renders/apple/1-inspector.html">
+      <div class="shot"><img src="renders/apple/screens/1-inspector-light.png" alt="Mac-style three-pane app with sidebar, applicant list and an inspector showing a score ring"></div>
+      <div class="body"><h3>1 · Mac inspector</h3><p>Sidebar, list and inspector. Pick a view or territory, sort with the segmented control, read one applicant in full.</p><span class="try">Try: <b>click rows, press ↑ ↓, switch Urgency / Score / ID</b></span><span class="open">Open the screen</span></div>
+    </a>
+    <a class="card" href="renders/apple/2-board.html">
+      <div class="shot"><img src="renders/apple/screens/2-board-light.png" alt="iPad-style board of territory cards with rings and score dots"></div>
+      <div class="body"><h3>2 · iPad board</h3><p>A card per territory with its ring and contenders. Tap one for a sheet with the PIN map and ranked contenders.</p><span class="try">Try: <b>tap TER-03, drag the sheet down or flick it</b></span><span class="open">Open the screen</span></div>
+    </a>
+    <a class="card" href="renders/apple/3-today.html">
+      <div class="shot"><img src="renders/apple/screens/3-today-light.png" alt="iPhone-style Today screen with widgets for slots, pipeline and scores"></div>
+      <div class="body"><h3>3 · iPhone Today</h3><p>Widgets for slots, the pipeline and scores, with a card carousel of applicants who need a person.</p><span class="try">Try: <b>scroll, swipe the Needs a person cards</b></span><span class="open">Open the screen</span></div>
+    </a>
+  </div>
+
+  <footer>The data is the 42-candidate test workbook: sample applicants made up for testing, not real people. Thresholds such as the ₹30, 20 and 15 lakh tier minimums are proposed defaults the brand still has to confirm. Use your browser's back button to return here from a screen.</footer>
+</div>
