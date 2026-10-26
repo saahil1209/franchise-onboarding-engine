@@ -55,7 +55,7 @@ Case 1 sources: `docs/case1-brief.pdf` (the brief) and `data/case1-template.xlsx
 - `jobs/`: scheduler and queue (daily Change Radar, re-scores, retention deletes).
 - `prompts/`, `evals/`, `data/` (open datasets, loaders and non-sensitive fixtures; no proprietary or real applicant data in git).
 - Keep the hackathon deployment as small as the acceptance criteria allow; justify any extra service in `docs/DESIGN.md`.
-- **Built so far:** `app/` is the Case 1 MVP as a static page; all logic is in `app/engine.js` and runs in the browser (no server, so each tab is its own isolated session). Tests: `cd app && node --test`. The stack above is for the platform slices (P1 onward).
+- **Built so far:** `app/` is the Case 1 MVP as a static page; all logic is in `app/engine.js` and runs in the browser (no server, so each tab is its own isolated session). The page uses the glass design from `renders/glass/`; dashboard figures come from `app/dashboard.js`; the map uses Google Maps via `app/api/maps-config.js` when a key is set, else a drawn schematic. Tests: `cd app && node --test`. The stack above is for the platform slices (P1 onward).
 
 ## Commands
 

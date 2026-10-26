@@ -11,9 +11,12 @@ Everything runs in the visitor's browser tab, so:
 ## Files
 
 - `engine.js`: all the rules (reading the workbook, validation, gates, score, allocation, onboarding plans, follow-ups). It has no UI.
-- `app.js` and `index.html`: the page.
+- `dashboard.js`: the figures on the Home dashboard and the map (counts, pipeline, score bands, queue, onboarding, cities), built from the live decisions. No UI.
+- `map.js`: the territory map. Google Maps when the deployment provides a key; otherwise a drawn schematic of the cities.
+- `api/maps-config.js`: a Vercel function that gives the page the Maps key from the project's environment variables.
+- `app.js` and `index.html`: the page, in the glass design from `renders/glass/`. Views: Home, Applications, Territories, History & rules.
 - `sample.js`: a provisional 23-row test workbook built from the brief's column list. Every row plants one edge case. The page has "Try with sample data" and "Download sample .xlsx" buttons.
-- `engine.test.js`: the tests. Run them with `node --test`.
+- `engine.test.js` and `dashboard.test.js`: the tests. Run them with `node --test`.
 
 ## Run locally
 
@@ -21,7 +24,13 @@ Everything runs in the visitor's browser tab, so:
 python3 -m http.server 8765
 ```
 
-Then open http://localhost:8765. ES modules don't load from `file://`, so you need this server even locally.
+Then open http://localhost:8765. ES modules don't load from `file://`, so you need this server even locally. Locally there is no `api/maps-config`, so the map shows the drawn schematic.
+
+## Google Maps
+
+Set `GOOGLE_MAPS_API_KEY` in the Vercel project's environment variables and redeploy. (The function also accepts `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `GOOGLE_MAPS_KEY`, `MAPS_API_KEY` or `VITE_GOOGLE_MAPS_API_KEY`.) Optional: `GOOGLE_MAPS_MAP_ID` for a styled map; without it the page uses Google's `DEMO_MAP_ID`.
+
+A Maps JavaScript key is visible in the browser by design. In Google Cloud, restrict it to this site's domain (HTTP referrers) and to the Maps JavaScript API. Markers are city-level and approximate; nothing from Google is stored.
 
 ## Deploy (a public link with no login)
 
@@ -35,9 +44,10 @@ Before you share the link, open it in a private window and run the judge walkthr
 ## Judge walkthrough
 
 1. Upload the workbook, or click "Try with sample data".
-2. The status counts and the applications table show every decision. Click a row to see its checks in order, the score breakdown, the plan and a draft message to the applicant.
-3. Ask "Why is APP-007 on hold?" or "What would APP-007 need to change to move forward?".
-4. Type "APP-012 has now found a ground-floor space". The page shows the proposed field change and the effect on every applicant. Click **Apply change**. In the sample, APP-012 moves from Waitlist to Approved and APP-013 is bumped from Conditional to Waitlist (a knock-on effect). The change is recorded in Change history.
+2. Home shows the headline figures, the territory map, who needs a person, and onboarding starts. Click a city on the map for its territories and ranked applicants. **Work through** opens the most urgent application.
+3. Applications shows every decision. Click a row to see its checks in order, the score breakdown, the plan and a draft message to the applicant. **Download decisions** exports them as .xlsx.
+4. On Home, ask "Why is APP-007 on hold?" or "What would APP-007 need to change to move forward?".
+5. Type "APP-012 has now found a ground-floor space". The page shows the proposed field change and the effect on every applicant. Click **Apply change**. In the sample, APP-012 moves from Waitlist to Approved and APP-013 is bumped from Conditional to Waitlist (a knock-on effect). The change is recorded in Change history.
 
 ## Test kit
 
