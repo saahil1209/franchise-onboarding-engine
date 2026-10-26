@@ -11,6 +11,38 @@ const STORE_KEY = 'franchise-session-v2';
 // All state lives in this tab (and its sessionStorage, so a refresh keeps it).
 let S = null; // { name, apps, territories, stores, problems, held, history: [], undo: [] }
 let result = null, selected = null, filter = null, pending = null;
+let query = '', sortKey = 'id', sortAsc = true;
+
+// Ascending status order follows the pipeline: furthest along first.
+const STATUS_ORDER = ['Approved', 'Brand review', 'Conditional', 'Waitlist', 'On hold', 'Not eligible', 'Withdrawn'];
+const SORTS = {
+  id: d => idNum(d.id),
+  name: d => d.app.name.toLowerCase() || null,
+  place: d => `${d.app.city || d.app.cityRaw} ${d.app.pin || d.app.pinRaw}`.toLowerCase().trim() || null,
+  status: d => STATUS_ORDER.indexOf(d.status),
+  score: d => d.score ? d.score.total : null,
+  reason: d => d.headline.toLowerCase(),
+  language: d => (d.app.language || d.app.languageRaw).toLowerCase() || null,
+};
+function visibleRows(ds) {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const get = SORTS[sortKey];
+  return ds
+    .filter(d => !filter || d.status === filter)
+    .filter(d => {
+      if (!words.length) return true;
+      const a = d.app;
+      const hay = [d.id, a.name, a.city, a.cityRaw, a.pin, a.pinRaw, d.status, d.headline, a.business, a.notes, a.language, d.territory].join(' ').toLowerCase();
+      return words.every(w => hay.includes(w));
+    })
+    .sort((x, y) => {
+      const p = get(x), q = get(y);
+      if (p === null && q !== null) return 1; // blanks always last
+      if (q === null && p !== null) return -1;
+      const c = p < q ? -1 : p > q ? 1 : 0;
+      return (sortAsc ? c : -c) || idNum(x.id) - idNum(y.id);
+    });
+}
 
 const recompute = () => { result = decide(S, { held: S.held }); S.held = nextHolds(result, S.held); };
 function save() {
@@ -69,7 +101,12 @@ function render() {
   for (const d of ds) counts[d.status] = (counts[d.status] || 0) + 1;
   $('counts').innerHTML = Object.keys(STATUS_RANK).reverse().filter(s => counts[s] || s !== 'Withdrawn').map(s =>
     `<button data-filter="${esc(s)}" aria-pressed="${filter === s}"><b>${counts[s] || 0}</b>${chip(s)}</button>`).join('');
-  $('apps').innerHTML = ds.filter(d => !filter || d.status === filter).map(d => `
+  const rows = visibleRows(ds);
+  $('shown').textContent = rows.length === ds.length ? `${ds.length} applications` : `Showing ${rows.length} of ${ds.length}`;
+  $('sort').value = sortKey;
+  $('sort-dir').textContent = sortAsc ? '↑ Ascending' : '↓ Descending';
+  for (const th of $('apps-head').querySelectorAll('th')) th.setAttribute('aria-sort', th.dataset.sort === sortKey ? (sortAsc ? 'ascending' : 'descending') : 'none');
+  $('apps').innerHTML = (rows.length ? '' : '<tr><td colspan="6" class="empty">No applications match.</td></tr>') + rows.map(d => `
     <tr tabindex="0" data-id="${esc(d.id)}" class="${d.id === selected ? 'sel' : ''}" aria-selected="${d.id === selected}">
       <td><b>${esc(d.id)}</b></td><td>${esc(d.app.name) || '<span class="muted">(blank)</span>'}</td>
       <td>${esc(d.app.city || d.app.cityRaw)} · ${esc(d.app.pin || d.app.pinRaw)}</td>
@@ -103,6 +140,16 @@ $('counts').addEventListener('click', e => {
   filter = filter === b.dataset.filter ? null : b.dataset.filter;
   render();
 });
+$('search').addEventListener('input', e => { query = e.target.value; render(); });
+$('sort').addEventListener('change', e => { sortKey = e.target.value; render(); });
+$('sort-dir').addEventListener('click', () => { sortAsc = !sortAsc; render(); });
+$('apps-head').addEventListener('click', e => {
+  const th = e.target.closest('th[data-sort]');
+  if (!th) return;
+  if (sortKey === th.dataset.sort) sortAsc = !sortAsc; else { sortKey = th.dataset.sort; sortAsc = true; }
+  render();
+});
+
 const pickRow = e => { const tr = e.target.closest('tr[data-id]'); if (tr) { selected = tr.dataset.id; render(); save(); if (innerWidth < 900) $('detail').scrollIntoView({ behavior: 'smooth' }); } };
 $('apps').addEventListener('click', pickRow);
 $('apps').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickRow(e); } });

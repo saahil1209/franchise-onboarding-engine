@@ -1,4 +1,4 @@
-# Franchise Onboarding Engine (Case 1 MVP)
+# InCubeAte: franchise onboarding engine (Case 1 MVP)
 
 A static web page. The judges upload the Case 1 workbook. Every applicant gets a status, the reason, the checks behind it, a score and next steps or an onboarding plan. Follow-up questions and new facts are typed into the box on the page.
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Franchise Onboarding Engine</title>
+<title>InCubeAte</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
   :root {
@@ -51,6 +51,10 @@
   .attention li, .flags li { margin-bottom: 6px; }
   .small { font-size: 12px; }
   #rules ol { padding-left: 20px; }
+  .toolbar { margin-bottom: 8px; }
+  .toolbar input[type=search] { flex: 1 1 220px; min-width: 0; font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .toolbar select { font: inherit; padding: 7px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  th button.sort { font: inherit; border: 0; background: none; padding: 0; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
   .counts button { display: flex; flex-direction: column; align-items: flex-start; min-width: 110px; }
   .counts button b { font-size: 22px; }
   .counts button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -85,7 +89,7 @@
 </head>
 <body>
 <main>
-  <h1>Franchise Onboarding Engine</h1>
+  <h1>InCubeAte</h1>
   <p class="muted">Upload the applications workbook. Every applicant gets a status, the reason, and next steps. Ask about any decision or give new facts below. Everything runs in this browser tab: nothing is sent to a server, and the session is kept only in this tab until you close it or press Start over.</p>
 
   <section class="card">
@@ -122,8 +126,24 @@
     <div class="grid">
       <section class="card">
         <h2>Applications</h2>
+        <div class="row toolbar">
+          <input id="search" type="search" placeholder="Search ID, name, city, PIN, status, business, notes…" aria-label="Search applications">
+          <label class="row" style="gap:6px">Sort by
+            <select id="sort" aria-label="Sort applications by">
+              <option value="id">ID</option>
+              <option value="name">Applicant</option>
+              <option value="place">City · PIN</option>
+              <option value="status">Status</option>
+              <option value="score">Score</option>
+              <option value="reason">Reason</option>
+              <option value="language">Preferred language</option>
+            </select>
+          </label>
+          <button id="sort-dir" type="button" aria-label="Sort direction">↑ Ascending</button>
+          <span id="shown" class="muted small" aria-live="polite"></span>
+        </div>
         <div class="scroll"><table>
-          <thead><tr><th>ID</th><th>Applicant</th><th>City · PIN</th><th>Status</th><th>Score</th><th>Reason</th></tr></thead>
+          <thead id="apps-head"><tr><th data-sort="id"><button class="sort">ID</button></th><th data-sort="name"><button class="sort">Applicant</button></th><th data-sort="place"><button class="sort">City · PIN</button></th><th data-sort="status"><button class="sort">Status</button></th><th data-sort="score"><button class="sort">Score</button></th><th data-sort="reason"><button class="sort">Reason</button></th></tr></thead>
           <tbody id="apps"></tbody>
         </table></div>
       </section>
