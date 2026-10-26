@@ -1,7 +1,7 @@
 import { readWorkbook, decide, interpret, applyChanges, applyTerritoryChange, diff, why, nextHolds, summaryFacts, isWinner, CONFIG, FIELD_LABEL, STATUS_RANK, idNum } from './engine.js';
 import { overview, finding } from './dashboard.js';
 import { mountMap } from './map.js';
-import { initPlan, renderPlan, relayoutPlan } from './plan.js';
+import { initPlan, renderPlan, relayoutPlan, hasPlan } from './plan.js';
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -465,4 +465,6 @@ try {
   }
 } catch { /* unreadable saved session: start fresh */ }
 initPlan({ go });
+// Step 1 comes first: a fresh visit with no plan and no workbook opens the brand form, whatever the address says.
+if (!S && !hasPlan() && route() !== 'plan') history.replaceState(null, '', '#plan');
 showView();
