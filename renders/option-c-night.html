@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InCubeAte · Option C · Night</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* True black, flat. Face: a cool near-black for long review sessions; lime only on slot winners. */
+  :root {
+    --ground: #0c0d0f; --surface: #15171a; --raised: #24272b; --border: #1c1e21; --rule: #1f2124; --control: #44474c;
+    --text: #ffffff; --muted: #b4b4b4; --faint: #949494; --accent: #c6f24e; --positive: #c6f24e; --negative: #e5484d; --warning: #e5a93b;
+    --chart-1: #c6f24e; --chart-muted: #4a4d52; --grid: #23262a; --axis-ink: #949494; --ink: #ffffff;
+    --pill-negative-bg: #2c1a20; --pill-negative-ink: #f07a8e; --pill-warning-bg: #2b2414; --pill-warning-ink: #e5a93b; --pill-neutral-bg: #24272b; --pill-neutral-ink: #ffffff;
+    --radius-card: 20px; --radius-control: 999px; --gap: 14px; --pad: 22px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.45 "Inter", system-ui, sans-serif; display: grid; grid-template-columns: 220px 1fr; grid-template-rows: 64px 1fr; min-height: 100vh; }
+  .num { font-variant-numeric: tabular-nums; }
+  aside { grid-row: 1 / 3; border-right: 1px solid var(--border); padding: 0 12px 16px; display: flex; flex-direction: column; }
+  .brand { height: 64px; display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px; padding-left: 8px; }
+  aside a { height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; color: #bbb; text-decoration: none; border-radius: 8px; margin-bottom: 2px; }
+  aside a[aria-current] { color: #fff; font-weight: 500; }
+  aside a .c { color: var(--faint); font-size: 12px; }
+  aside .grp { color: var(--faint); font-size: 12px; margin: 22px 8px 8px; }
+  aside .me { margin-top: auto; display: flex; gap: 8px; align-items: center; color: #bbb; padding: 0 8px; }
+  .avatar { width: 26px; height: 26px; border-radius: 50%; background: #23302a; color: #cfe3d6; display: grid; place-items: center; font-size: 12px; font-weight: 500; }
+  .top { border-bottom: 1px solid var(--border); display: flex; align-items: center; padding-left: 29px; }
+  .search { width: 420px; height: 36px; white-space: nowrap; overflow: hidden; border-radius: 999px; background: var(--surface); display: flex; align-items: center; padding: 0 16px; color: var(--faint); }
+  .switcher { margin-left: auto; height: 100%; border-left: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; padding: 0 29px; min-width: 260px; }
+  .switcher span { color: var(--faint); font-size: 12px; }
+  main { padding: 26px 29px 32px; min-width: 0; }
+  .title { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .sub { margin: 0; color: var(--muted); max-width: 700px; }
+  .sub b { color: #fff; font-weight: 500; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 999px; border: 0; font: inherit; font-weight: 500; cursor: pointer; }
+  .btn.primary { background: #fff; color: #000; }
+  .btn.ghost { background: var(--raised); color: #fff; }
+  /* Grid: 1fr + a 384px rail, 14px gap. */
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 384px; gap: var(--gap); margin-top: 20px; align-items: start; }
+  .grid > *, .stack > * { min-width: 0; }
+  .card { background: var(--surface); border-radius: var(--radius-card); padding: var(--pad); }
+  .stack { display: grid; gap: var(--gap); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); padding: 0; }
+  .kpi { padding: 18px 22px; }
+  .kpi + .kpi { border-left: 1px solid var(--rule); }
+  .kpi span { color: var(--muted); display: block; margin-bottom: 4px; }
+  .kpi b { font-size: 24px; font-weight: 500; display: block; font-variant-numeric: tabular-nums; }
+  .kpi b.lead { font-size: 32px; }
+  .kpi b small { font-size: 14px; color: var(--faint); font-weight: 400; }
+  .kpi em { font-style: normal; color: var(--faint); font-size: 13px; }
+  .card h2 { font-size: 16px; font-weight: 500; margin: 0; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .mbrand { display: none; }
+  #strip { overflow-x: auto; }
+  .legend { display: flex; gap: 14px; color: var(--muted); font-size: 13px; align-items: center; }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+  #strip text { font: 13px "Inter", sans-serif; }
+  .bar100 { display: flex; height: 12px; gap: 2px; border-radius: 999px; overflow: hidden; margin: 2px 0 14px; }
+  .bar100 i { display: block; }
+  table.parts { width: 100%; border-collapse: collapse; }
+  .parts td { padding: 8px 0; border-top: 1px solid var(--rule); }
+  .parts td.n { text-align: right; font-variant-numeric: tabular-nums; width: 70px; }
+  .parts td.s { text-align: right; color: var(--faint); width: 60px; font-variant-numeric: tabular-nums; }
+  .rail h2 { font-size: 16px; font-weight: 500; margin: 0 0 8px; display: flex; justify-content: space-between; }
+  .rail h2 span { color: var(--faint); font-weight: 400; font-size: 12px; }
+  .rail .card { padding: 6px 22px 16px; margin-bottom: 16px; }
+  .rows { list-style: none; margin: 0; padding: 0; }
+  .rows li { min-height: 45px; display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; gap: 10px; align-items: center; border-bottom: 1px solid var(--rule); padding: 7px 0; }
+  .rows li:last-child { border-bottom: 0; }
+  .rows .id { color: var(--faint); font-variant-numeric: tabular-nums; font-size: 13px; }
+  .rows .t { min-width: 0; }
+  .rows .t div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rows .t .m { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .rows .t .m { color: var(--muted); font-size: 13px; }
+  .pill { height: 22px; line-height: 22px; padding: 0 9px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
+  .p-neg { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+  .p-warn { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+  .p-neu { background: var(--pill-neutral-bg); color: var(--pill-neutral-ink); }
+  .viewall { width: 100%; height: 30px; border-radius: 999px; border: 1px solid var(--control); background: transparent; color: #fff; font: inherit; margin-top: 8px; cursor: pointer; }
+  .wk { color: var(--muted); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 900px) {
+    body { display: block; }
+    aside { display: none; }
+    .top { height: 56px; padding: 0 16px; }
+    .search { width: auto; flex: 1; }
+    .mbrand { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-right: 12px; white-space: nowrap; }
+    .head { flex-wrap: wrap; }
+    .switcher { display: none; }
+    main { padding: 16px; }
+    .title { flex-direction: column; align-items: flex-start; }
+    .grid { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .kpi:nth-child(odd) { border-left: 0; }
+    .kpi:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  }
+</style>
+</head>
+<body>
+<aside aria-label="Main">
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="#fff" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="#c6f24e"/></svg>InCubeAte</div>
+  <a href="#" aria-current="page">Overview</a>
+  <a href="#">Applications <span class="c" id="n-all"></span></a>
+  <a href="#">Needs a person <span class="c" id="n-queue"></span></a>
+  <a href="#">Territories <span class="c" id="n-terr"></span></a>
+  <a href="#">Onboarding <span class="c" id="n-onb"></span></a>
+  <div class="grp">Records</div>
+  <a href="#">Change history</a>
+  <a href="#">Rules and thresholds</a>
+  <div class="me"><div class="avatar" aria-hidden="true">ET</div>Expansion team</div>
+</aside>
+<div class="top">
+  <div class="mbrand"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="#fff" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="#c6f24e"/></svg>InCubeAte</div>
+  <div class="search" role="search">Search applicants, PINs, territories</div>
+  <div class="switcher"><span>Workspace</span>Karnataka expansion · Case 1</div>
+</div>
+<main>
+  <div class="title">
+    <div><h1>Overview</h1><p class="sub" id="sub"></p></div>
+    <div style="display:flex;gap:8px"><button class="btn ghost">Upload workbook</button><button class="btn primary" id="primary"></button></div>
+  </div>
+  <div class="grid">
+    <div class="stack">
+      <section class="card kpis" id="kpis" aria-label="Headline figures"></section>
+      <section class="card" aria-labelledby="strip-h">
+        <div class="head"><h2 id="strip-h">Who competed for each territory</h2><div class="legend" id="strip-leg"></div></div>
+        <div id="strip"></div>
+      </section>
+      <section class="card" aria-labelledby="parts-h">
+        <div class="head"><h2 id="parts-h">Where the applications ended up</h2><span class="legend" id="parts-n"></span></div>
+        <div class="bar100" id="bar100"></div>
+        <table class="parts"><tbody id="parts"></tbody></table>
+      </section>
+    </div>
+    <div class="rail">
+      <h2>Needs a person <span id="q-n"></span></h2>
+      <div class="card"><ul class="rows" id="queue"></ul><button class="viewall" id="viewall"></button></div>
+      <h2>Onboarding starts <span>weeks to opening</span></h2>
+      <div class="card"><ul class="rows" id="onb"></ul></div>
+    </div>
+  </div>
+</main>
+<script type="module">
+  import { load } from './data.js';
+  const D = await load();
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const empty = D.territories.filter(t => t.slots > t.approved + t.pending);
+  $('n-all').textContent = D.total; $('n-queue').textContent = D.queue.length; $('n-terr').textContent = D.territories.length; $('n-onb').textContent = D.counts['Approved'];
+  $('primary').textContent = `Work through ${D.queue.length}`;
+  $('sub').innerHTML = `<b>${D.filled} of ${D.slots} slots</b> have a partner. ${empty.map(t => `${t.id} ${t.city}`).join(', ')} is still open: every one of its ${empty[0]?.applicants ?? 0} applicants is blocked or waiting on answers.`;
+  const kpi = (l, v, n, lead) => `<div class="kpi"><span>${l}</span><b class="${lead ? 'lead' : ''}">${v}</b><em>${n}</em></div>`;
+  $('kpis').innerHTML = kpi('Slots with a partner', `${D.filled}<small> / ${D.slots}</small>`, `${D.counts['Brand review'] + D.counts['Conditional']} still under brand review`, true)
+    + kpi('Applications', D.total, D.file) + kpi('Needs a person', D.queue.length, `${D.counts['On hold']} on hold`) + kpi('Ready to onboard', D.counts['Approved'], 'approved, pending sign-off');
+
+  // Rank strip: one row per territory on a shared 40–100 score axis. Lime dots hold a slot; grey dots competed and lost.
+  const terrs = D.territories.filter(t => t.slots || t.contenders);
+  function drawStrip() {
+  const compact = $('strip').clientWidth < 520, W = compact ? Math.max(300, $('strip').clientWidth) : 760, L = compact ? 58 : 150, R = 16, rowH = 34, top = 8, H = top + terrs.length * rowH + 26, x = s => L + (s - 40) / 60 * (W - L - R);
+  const NS = 'http://www.w3.org/2000/svg';
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Scores of every eligible applicant by territory; slot winners highlighted">`;
+  for (const v of [40, 55, 70, 85, 100]) svg += `<line x1="${x(v)}" x2="${x(v)}" y1="${top}" y2="${H - 22}" stroke="var(--grid)"/><text x="${x(v)}" y="${H - 6}" fill="var(--axis-ink)" text-anchor="middle">${v}</text>`;
+  terrs.forEach((t, i) => {
+    const y = top + i * rowH + rowH / 2;
+    svg += `<text x="0" y="${y + 4}" fill="#fff">${t.id}</text>` + (compact ? '' : `<text x="56" y="${y + 4}" fill="var(--muted)">${t.city.replace('Hubballi-Dharwad', 'Hubballi')}</text>`);
+    svg += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="var(--raised)" stroke-width="2"/>`;
+    const ids = Object.values(D.decisions).filter(d => d.territory === t.id && d.score);
+    for (const d of ids.sort((a, b) => a.score.total - b.score.total)) {
+      const won = t.winners.some(w => w.id === d.id);
+      svg += won ? `<circle cx="${x(d.score.total)}" cy="${y}" r="6.5" fill="var(--chart-1)"><title>${d.id} ${d.score.total} · holds a slot</title></circle>`
+        : `<circle cx="${x(d.score.total)}" cy="${y}" r="5.5" fill="var(--ground)" stroke="#8a8d92" stroke-width="1.5"><title>${d.id} ${d.score.total} · ${d.status}</title></circle>`;
+    }
+    const note = t.slots === 0 ? '0 slots' : !ids.length ? (compact ? 'open' : 'open · nobody eligible') : `${t.approved + t.pending} of ${t.slots}`;
+    svg += `<text x="${W - R}" y="${y - 9}" fill="${!ids.length && t.slots ? 'var(--negative)' : 'var(--faint)'}" text-anchor="end">${note}</text>`;
+  });
+  $('strip').innerHTML = svg + '</svg>';
+  }
+  drawStrip();
+  let lastW = $('strip').clientWidth;
+  new ResizeObserver(() => { const w = $('strip').clientWidth; if ((w < 520) !== (lastW < 520) || (w < 520 && w !== lastW)) { lastW = w; drawStrip(); } }).observe($('strip'));
+  $('strip-leg').innerHTML = '<span><i style="background:var(--chart-1)"></i>Holds a slot</span><span><i style="border:1.5px solid #8a8d92;width:7px;height:7px"></i>Competed, waiting</span><span>Score out of 100</span>';
+
+  const parts = [['Holding a slot', D.filled, 'var(--chart-1)'], ['Waitlist', D.counts['Waitlist'], '#e6e6e6'], ['On hold for answers', D.counts['On hold'], '#6b6b6b'], ['Not eligible', D.counts['Not eligible'], '#3a3d42']];
+  console.assert(parts.reduce((s, p) => s + p[1], 0) === D.total, 'parts add up');
+  $('parts-n').textContent = `${D.total} applications`;
+  $('bar100').innerHTML = parts.map(([l, v, c]) => `<i style="width:${100 * v / D.total}%;background:${c}" title="${l} ${v}"></i>`).join('');
+  $('parts').innerHTML = parts.map(([l, v, c]) => `<tr><td><span class="legend" style="display:inline-flex;color:#fff"><i style="background:${c}"></i>${l}</span></td><td class="n">${v}</td><td class="s">${Math.round(100 * v / D.total)}%</td></tr>`).join('');
+
+  $('q-n').textContent = `${D.queue.length} total`;
+  $('queue').innerHTML = D.queue.slice(0, 5).map(q => `<li><span class="id">${q.id}</span><div class="t"><div>${esc(q.name)}</div><div class="m">${esc(q.why)}</div></div><span class="pill ${q.fraud ? 'p-neg' : q.status === 'On hold' ? 'p-neu' : 'p-warn'}">${q.fraud ? 'Paid an agent' : q.status}</span></li>`).join('');
+  $('viewall').textContent = `View all ${D.queue.length}`;
+  $('onb').innerHTML = D.winners.filter(w => w.status === 'Approved').slice(0, 5).map(w => `<li><span class="id">${w.id}</span><div class="t"><div>${esc(w.name)} · ${w.city}</div><div class="m">${w.track} in ${w.language}, buddy ${w.buddy}</div></div><span class="wk">${w.weeks} wk</span></li>`).join('');
+</script>
+</body>
+</html>

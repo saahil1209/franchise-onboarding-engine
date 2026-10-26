@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InCubeAte · Option A · Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Achromatic ledger. Face: a blue-grey ledger ground; the one hue (#1d5fbf) marks approved slots only. */
+  :root {
+    --ground: #f2f4f7; --surface: #ffffff; --raised: #eef0f3; --border: #e3e6ea; --rule: #eef0f2; --control: #d4d4d4;
+    --text: #0a0a0a; --muted: #5f6368; --accent: #141414; --positive: #2e7d32; --negative: #c4242a; --warning: #92400e;
+    --chart-1: #1d5fbf; --chart-muted: #c9ccd1; --grid: #e6e8eb; --axis-ink: #5f6368; --ink: #0a0a0a;
+    --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e; --pill-warning-bg: #fffbeb; --pill-warning-ink: #92400e;
+    --pill-neutral-bg: #eeeeee; --pill-neutral-ink: #3d3d3d; --pill-positive-bg: #dcfae5; --pill-positive-ink: #04250e;
+    --radius-card: 8px; --radius-control: 6px; --gap: 12px; --pad: 24px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.45 "Geist", Inter, system-ui, sans-serif; }
+  .num, td.n, .kpi b { font-variant-numeric: tabular-nums; }
+  .mono { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; }
+  /* Column: 1120px centred; 3 grid columns of (1120 - 2×12)/3 = 365.3px; the wide card spans 2 = 742.7px. */
+  .col { width: min(1120px, 100% - 32px); margin: 0 auto; }
+  header.bar { height: 48px; display: flex; align-items: center; gap: 28px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+  nav { display: flex; gap: 20px; font-weight: 500; color: var(--muted); }
+  nav a { color: inherit; text-decoration: none; padding: 4px 0; }
+  nav a[aria-current] { color: var(--text); }
+  nav .count { color: var(--muted); font-weight: 400; margin-left: 4px; }
+  .search { margin-left: auto; width: 240px; height: 32px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface); display: flex; align-items: center; padding: 0 10px; color: var(--muted); }
+  .who { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .avatar { width: 26px; height: 26px; border-radius: 50%; background: #e3e8f0; color: #2b3a52; display: grid; place-items: center; font-weight: 500; font-size: 12px; }
+  .title { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin: 28px 0 20px; }
+  h1 { font-size: 24px; font-weight: 500; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .finding { margin: 0; color: var(--text); max-width: 680px; }
+  .finding .muted { color: var(--muted); }
+  .actions { display: flex; gap: 8px; flex: none; }
+  .btn { height: 36px; padding: 0 14px; border-radius: var(--radius-control); border: 0; font: inherit; font-weight: 500; cursor: pointer; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.secondary { background: #e5e5e5; color: var(--text); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
+  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); margin-bottom: var(--gap); }
+  .kpi { padding: 16px 20px; }
+  .kpi + .kpi { border-left: 1px solid var(--border); }
+  .kpi span { color: var(--muted); display: block; margin-bottom: 4px; }
+  .kpi b { font-size: 24px; font-weight: 400; display: block; line-height: 1.15; }
+  .kpi b.lead { font-size: 30px; }
+  .kpi b small { font-size: 14px; color: var(--muted); font-weight: 400; }
+  .kpi em { font-style: normal; color: var(--muted); font-size: 12px; display: block; margin-top: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin-bottom: var(--gap); align-items: start; }
+  .span2 { grid-column: span 2; }
+  .card h2 { font-size: 16px; font-weight: 500; margin: 0; }
+  .card .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 18px 20px 12px; }
+  .card .head .muted { color: var(--muted); font-size: 12px; }
+  .card .body { padding: 0 20px 18px; }
+  /* Slot board: the product's own element. One row per territory; each open slot is a square. */
+  .board { width: 100%; border-collapse: collapse; }
+  .board th { text-align: left; font-weight: 400; color: var(--muted); font-size: 12px; padding: 0 0 8px; }
+  .board th.n, .board td.n { text-align: right; }
+  .board td { padding: 8px 0; border-top: 1px solid var(--rule); vertical-align: middle; }
+  .board .terr b { font-weight: 500; }
+  .board .terr span { color: var(--muted); }
+  .slots { display: flex; gap: 6px; }
+  .slot { width: 26px; height: 26px; border-radius: 4px; }
+  .slot.approved { background: var(--chart-1); }
+  /* A held slot: a 1px diagonal hatch in the hue, framed, so it reads apart from an approved (filled) slot. */
+  .hatch { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 1l2-2M0 6l6-6M5 7l2-2' stroke='%231d5fbf' stroke-width='1.6'/%3E%3C/svg%3E"); border: 1px solid var(--chart-1); }
+  .slot.empty { border: 1px dashed #9aa0a6; }
+  .slot.none { width: auto; height: auto; color: var(--muted); font-size: 12px; }
+  .who-won { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 290px; }
+  .who-won b { color: var(--text); font-weight: 500; }
+  .legend { display: flex; gap: 14px; color: var(--muted); font-size: 12px; align-items: center; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .flag-empty { color: var(--negative); }
+  .queue { list-style: none; margin: 0; padding: 0; }
+  .queue li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--rule); }
+  .queue .why { color: var(--muted); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .queue .name { font-weight: 500; }
+  .pill { display: inline-block; height: 20px; line-height: 20px; padding: 0 8px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
+  .pill.neg { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+  .pill.warn { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+  .pill.neutral { background: var(--pill-neutral-bg); color: var(--pill-neutral-ink); }
+  .viewall { display: block; margin-top: 10px; height: 30px; width: 100%; border: 1px solid var(--control); background: var(--surface); border-radius: var(--radius-control); font: inherit; cursor: pointer; }
+  .caption { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+  footer { color: var(--muted); font-size: 12px; padding: 8px 0 28px; display: flex; justify-content: space-between; }
+  @media (max-width: 900px) {
+    nav, .search, .who span { display: none; }
+    .title { flex-direction: column; align-items: flex-start; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .kpi:nth-child(odd) { border-left: 0; }
+    .kpi:nth-child(n+3) { border-top: 1px solid var(--border); }
+    .grid { grid-template-columns: 1fr; }
+    .span2 { grid-column: auto; }
+    .who-won { max-width: 140px; }
+  }
+</style>
+</head>
+<body>
+<header class="col bar">
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="#0a0a0a" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="#0a0a0a" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="#1d5fbf"/></svg>
+    InCubeAte
+  </div>
+  <nav aria-label="Main">
+    <a href="#" aria-current="page">Overview</a>
+    <a href="#">Applications<span class="count" id="nav-apps"></span></a>
+    <a href="#">Territories</a>
+    <a href="#">Onboarding</a>
+  </nav>
+  <div class="search" role="search">Search applicants or PINs</div>
+  <div class="who"><span>Expansion team</span><div class="avatar" aria-hidden="true">ET</div></div>
+</header>
+
+<main class="col">
+  <div class="title">
+    <div>
+      <h1>Partner pipeline</h1>
+      <p class="finding" id="finding"></p>
+    </div>
+    <div class="actions"><button class="btn secondary">Upload workbook</button><button class="btn primary" id="primary"></button></div>
+  </div>
+
+  <section class="card kpis" id="kpis" aria-label="Headline figures"></section>
+
+  <div class="grid">
+    <section class="card span2" aria-labelledby="board-h">
+      <div class="head"><h2 id="board-h">Slots by territory</h2>
+        <div class="legend"><span><i style="background:var(--chart-1)"></i>Approved</span><span><i class="hatch"></i>Held, not final</span><span><i style="border:1px dashed #9aa0a6"></i>Open</span></div>
+      </div>
+      <div class="body"><table class="board"><thead><tr><th>Territory</th><th>Slots</th><th>Holding a slot</th><th class="n">Applicants</th></tr></thead><tbody id="board"></tbody></table></div>
+    </section>
+    <section class="card" aria-labelledby="queue-h">
+      <div class="head"><h2 id="queue-h">Needs a person</h2><span class="muted" id="queue-n"></span></div>
+      <div class="body"><ul class="queue" id="queue"></ul><button class="viewall" id="viewall"></button></div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="score-h">
+      <div class="head"><h2 id="score-h">Score bands</h2><div class="legend" style="white-space:nowrap"><span><i style="background:var(--chart-1)"></i>Holds a slot</span><span><i style="background:var(--chart-muted)"></i>Waiting</span></div></div>
+      <div class="body"><div id="scores"></div><p class="caption" id="score-cap"></p></div>
+    </section>
+    <section class="card" aria-labelledby="hold-h">
+      <div class="head"><h2 id="hold-h">Why applications are on hold</h2><span class="muted" id="hold-n"></span></div>
+      <div class="body"><div id="holds"></div><p class="caption">Each needs one answer from the applicant; the questions are drafted in the queue.</p></div>
+    </section>
+    <section class="card" aria-labelledby="wait-h">
+      <div class="head"><h2 id="wait-h">Why applicants are waiting</h2><span class="muted" id="wait-n"></span></div>
+      <div class="body"><div id="waits"></div></div>
+    </section>
+  </div>
+  <footer><span id="src"></span><span>Thresholds are proposed defaults for the brand to confirm.</span></footer>
+</main>
+
+<script src="charts.js"></script>
+<script type="module">
+  import { load } from './data.js';
+  const D = await load();
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const empty = D.territories.filter(t => t.slots > t.approved + t.pending);
+  const queueN = D.queue.length;
+
+  $('nav-apps').textContent = D.total;
+  $('primary').textContent = `Work through ${queueN}`;
+  $('finding').innerHTML = `${D.filled} of ${D.slots} slots are allocated. ${empty.map(t => `<b>${t.id}</b>'s ${t.slots === 1 ? 'slot is' : 'slots are'} still open: none of its ${t.applicants} applicants can take it yet`).join('; ')}. <span class="muted">${D.fraud.length} applicant says they paid an agent.</span>`;
+  const kpi = (label, value, note, lead) => `<div class="kpi"><span>${label}</span><b class="${lead ? 'lead' : ''}">${value}</b><em>${note}</em></div>`;
+  $('kpis').innerHTML =
+    kpi('Slots allocated', `${D.filled}<small> / ${D.slots}</small>`, `${D.counts['Approved']} approved, ${D.counts['Brand review'] + D.counts['Conditional']} held for review`, true) +
+    kpi('Applications', D.total, `from ${D.file}`) +
+    kpi('Needs a person', queueN, `${D.counts['On hold']} on hold, ${queueN - D.counts['On hold']} flagged`) +
+    kpi('Waitlist', D.counts['Waitlist'], 'reasons below') +
+    kpi('Not eligible', D.counts['Not eligible'], 'below the city-tier minimum');
+
+  $('board').innerHTML = D.territories.map(t => {
+    const sq = [...Array(t.approved)].map(() => '<span class="slot approved" title="Approved"></span>').join('')
+      + [...Array(t.pending)].map(() => '<span class="slot hatch" title="Held, not final"></span>').join('')
+      + [...Array(Math.max(0, t.slots - t.approved - t.pending))].map(() => '<span class="slot empty" title="Open"></span>').join('');
+    const won = t.winners.length ? t.winners.map(w => `<b>${w.id}</b> ${esc(w.name.split(' ')[0])} ${w.score.toFixed(0)}`).join(' · ') : (t.slots ? '<span class="flag-empty">Open: no eligible applicant</span>' : 'Not opening here now');
+    return `<tr><td class="terr"><b>${t.id}</b> <span>${t.city} · ${t.priority}</span></td><td><div class="slots">${sq || '<span class="slot none">0 slots</span>'}</div></td><td class="who-won">${won}</td><td class="n num">${t.applicants}</td></tr>`;
+  }).join('');
+
+  $('queue-n').textContent = `${queueN} total`;
+  $('queue').innerHTML = D.queue.slice(0, 4).map(q => `<li><span class="mono">${q.id}</span><div><div class="name">${esc(q.name)}</div><div class="why">${esc(q.why)}</div></div><span class="pill ${q.fraud ? 'neg' : q.status === 'On hold' ? 'neutral' : 'warn'}">${q.fraud ? 'Paid an agent' : q.status}</span></li>`).join('');
+  $('viewall').textContent = `View all ${queueN}`;
+
+  // Stacked columns: slot winners (the one hue) at the base, the rest of the band in grey above a 2px seam.
+  {
+    const W = 340, H = 166, padL = 22, padB = 20, top = 6, max = Math.max(...D.bins.map(b => b.n));
+    const step = 2, yMax = Math.ceil((max + 1) / step) * step, y = v => top + (H - padB - top) * (1 - v / yMax);
+    const band = (W - padL) / D.bins.length, bw = band * 0.62;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Eligible applicants by score band, slot winners at the base of each column">`;
+    for (let v = 0; v <= yMax; v += step) s += `<line x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? 'var(--grid)' : '#c9ccd1'}"/><text x="${padL - 6}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="var(--axis-ink)">${v}</text>`;
+    D.bins.forEach((b, i) => {
+      const cx = padL + band * i + band / 2, x = cx - bw / 2;
+      if (b.won) s += `<rect x="${x}" y="${y(b.won)}" width="${bw}" height="${y(0) - y(b.won)}" fill="var(--chart-1)"><title>${b.label}: ${b.won} hold a slot</title></rect>`;
+      const rest = b.n - b.won;
+      if (rest) s += `<rect x="${x}" y="${y(b.n)}" width="${bw}" height="${y(b.won) - y(b.n) - (b.won ? 2 : 0)}" fill="var(--chart-muted)"><title>${b.label}: ${rest} waiting</title></rect>`;
+      s += `<text x="${cx}" y="${H - 4}" text-anchor="middle" font-size="12" fill="var(--axis-ink)">${b.label}</text>`;
+    });
+    $('scores').innerHTML = s + '</svg>';
+  }
+  const ws = D.winners.map(w => w.score);
+  $('score-cap').textContent = `${D.scored} scored. Slot winners scored ${Math.min(...ws).toFixed(0)}–${Math.max(...ws).toFixed(0)}; one store per PIN means a high score can still wait.`;
+  $('hold-n').textContent = `${D.counts['On hold']} total`;
+  Charts.barList($('holds'), D.holdReasons);
+  $('wait-n').textContent = `${D.counts['Waitlist']} total`;
+  Charts.barList($('waits'), D.waitReasons.slice(0, 4).concat(D.waitReasons.length > 4 ? [{ label: "Other", value: D.waitReasons.slice(4).reduce((s, x) => s + x.value, 0) }] : []));
+  $('src').textContent = `${D.file} · ${D.total} applications · ${D.territories.length} territories · ${D.stores} existing stores`;
+</script>
+</body>
+</html>

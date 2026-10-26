@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InCubeAte · Option B · Framed sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Framed sheet. Face: the frame tinted a field green-grey (growth, new ground); the dealt teal on the main data. */
+  :root {
+    --ground: #f1f5f2; --surface: #ffffff; --raised: #f4f6f5; --active: #e4ebe6; --border: #e6eae7; --rule: #eef1ef; --control: #cdd2ce;
+    --text: #131416; --muted: #5d5f60; --accent: #1b6c80; --positive: #1e7b4f; --negative: #c4242a; --warning: #92400e;
+    --chart-1: #1b6c80; --chart-muted: #c7cdc9; --grid: #e8ebe9; --axis-ink: #5d5f60; --ink: #131416;
+    --pill-positive-bg: #dcfae5; --pill-positive-ink: #04250e; --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e;
+    --pill-warning-bg: #fffbeb; --pill-warning-ink: #92400e; --pill-neutral-bg: #ebedee; --pill-neutral-ink: #353736;
+    --pill-info-bg: #e3f1f4; --pill-info-ink: #0f4552;
+    --radius-card: 8px; --radius-control: 6px; --radius-sheet: 16px; --gap: 24px; --pad: 24px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.45 "IBM Plex Sans", Inter, system-ui, sans-serif; display: grid; grid-template-columns: 228px 1fr; grid-template-rows: 48px 1fr; }
+  .num, td.n { font-variant-numeric: tabular-nums; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; }
+  aside { grid-row: 1 / 3; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; padding: 2px 8px 14px; }
+  .switch { margin: 0 0 14px; padding: 8px 10px; border-radius: var(--radius-control); background: var(--active); font-size: 13px; }
+  .switch span { color: var(--muted); display: block; font-size: 12px; }
+  aside a { display: flex; justify-content: space-between; align-items: center; height: 32px; padding: 0 10px; border-radius: 8px; color: var(--muted); text-decoration: none; }
+  aside a[aria-current] { background: var(--active); color: var(--text); font-weight: 500; }
+  aside a .c { font-size: 12px; color: var(--muted); }
+  aside .grp { font-size: 12px; color: var(--muted); margin: 18px 10px 6px; }
+  aside .me { margin-top: auto; display: flex; gap: 8px; align-items: center; padding: 8px 10px; color: var(--muted); }
+  .avatar { width: 26px; height: 26px; border-radius: 50%; background: #dfe9e3; color: #23412f; display: grid; place-items: center; font-weight: 500; font-size: 12px; }
+  .top { display: flex; align-items: center; gap: 12px; padding-right: 16px; }
+  .top .search { margin: 0 auto; white-space: nowrap; overflow: hidden; width: min(548px, 60%); height: 32px; border-radius: var(--radius-control); background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; color: var(--muted); }
+  .mbrand { display: none; }
+  .kbd { font-size: 12px; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; }
+  .fresh { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  /* The sheet: white, inset 8px from the right and bottom, 16px corners, 1px edge, no shadow. */
+  .sheet { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sheet); margin: 0 8px 8px 0; padding: var(--pad); min-width: 0; }
+  .title { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { margin: 0; color: var(--muted); max-width: 720px; }
+  .sub b { color: var(--text); font-weight: 500; }
+  .btn { height: 32px; padding: 0 14px; border-radius: var(--radius-control); font: inherit; font-weight: 500; border: 1px solid var(--control); background: var(--surface); cursor: pointer; }
+  .btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
+  .tabs { display: flex; gap: 24px; margin: 18px 0 0; border-bottom: 1px solid var(--border); }
+  .tabs a { padding: 0 0 10px; color: var(--muted); text-decoration: none; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs a[aria-current] { color: var(--text); border-color: var(--text); }
+  .tabs a b { font-weight: 400; color: var(--muted); margin-left: 4px; }
+  /* Grid: 1fr + a 352px rail, 24px gap. */
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 352px; gap: var(--gap); margin-top: 20px; }
+  .grid > * { min-width: 0; }
+  section[aria-label] { overflow-x: auto; }
+  .tools { display: flex; gap: 8px; margin-bottom: 10px; }
+  .tools .field { flex: 1; height: 32px; border: 1px solid var(--control); border-radius: var(--radius-control); display: flex; align-items: center; padding: 0 10px; color: var(--muted); }
+  .tools .sel { height: 32px; border: 1px solid var(--control); border-radius: var(--radius-control); display: flex; align-items: center; padding: 0 10px; gap: 6px; }
+  .tools .sel span { color: var(--muted); }
+  table.list { width: 100%; border-collapse: collapse; }
+  .list th { text-align: left; font-weight: 400; font-size: 12px; color: var(--muted); padding: 0 8px 8px; }
+  .list th.n, .list td.n { text-align: right; }
+  .list td { padding: 0 8px; height: 46px; border-top: 1px solid var(--rule); vertical-align: middle; white-space: nowrap; }
+  .list td.why { color: var(--muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+  .list td.act { text-align: right; }
+  .list .link { color: var(--accent); font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .list tr.sel td { background: #f6faf8; }
+  .pill { display: inline-block; height: 20px; line-height: 20px; padding: 0 8px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
+  .p-Approved { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+  .p-Brand-review { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+  .p-Conditional { background: var(--pill-info-bg); color: var(--pill-info-ink); }
+  .p-On-hold { background: var(--pill-neutral-bg); color: var(--pill-neutral-ink); }
+  .p-Waitlist { background: var(--pill-neutral-bg); color: var(--pill-neutral-ink); }
+  .p-fraud { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+  .more { margin-top: 10px; color: var(--muted); font-size: 13px; }
+  .rail h2 { font-size: 16px; font-weight: 600; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; }
+  .rail h2 span { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .rail .card { border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px; margin-bottom: 16px; }
+  .share { display: flex; height: 10px; border-radius: 999px; overflow: hidden; gap: 2px; margin: 4px 0 10px; }
+  .share i { display: block; }
+  .shareleg { display: grid; grid-template-columns: repeat(3, 1fr); font-size: 13px; }
+  .shareleg span { color: var(--muted); display: block; font-size: 12px; }
+  .shareleg b { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  @media (max-width: 900px) {
+    body { display: block; }
+    aside { display: none; }
+    .top { height: 48px; padding: 0 12px; }
+    .top .search { width: auto; flex: 1; }
+    .mbrand { display: flex; align-items: center; gap: 8px; font-weight: 600; white-space: nowrap; }
+    .fresh { display: none; }
+    .sheet { margin: 0; border-radius: 0; border: 0; padding: 16px; }
+    .title { flex-direction: column; align-items: flex-start; }
+    .tabs { overflow-x: auto; gap: 16px; }
+    .tabs a { white-space: nowrap; }
+    .grid { grid-template-columns: 1fr; }
+    .list td.why, .list th.why, .list td.place, .list th.place { display: none; }
+  }
+</style>
+</head>
+<body>
+<aside aria-label="Main">
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="#131416" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="#131416" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="#1b6c80"/></svg>InCubeAte</div>
+  <div class="switch"><span>Workspace</span>Karnataka expansion · Case 1</div>
+  <a href="#">Overview</a>
+  <a href="#" aria-current="page">Applications <span class="c" id="n-all"></span></a>
+  <a href="#">Needs a person <span class="c" id="n-queue"></span></a>
+  <a href="#">Territories <span class="c" id="n-terr"></span></a>
+  <a href="#">Onboarding <span class="c" id="n-onb"></span></a>
+  <div class="grp">Records</div>
+  <a href="#">Change history</a>
+  <a href="#">Existing stores</a>
+  <a href="#">Rules and thresholds</a>
+  <div class="me"><div class="avatar" aria-hidden="true">ET</div>Expansion team</div>
+</aside>
+<div class="top">
+  <div class="mbrand"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="#131416" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="#131416" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="#1b6c80"/></svg>InCubeAte</div>
+  <div class="search" role="search"><span>Search applicants, PINs, territories</span><span class="kbd">/</span></div>
+  <span class="fresh" id="fresh"></span>
+</div>
+<main class="sheet">
+  <div class="title">
+    <div><h1>Applications</h1><p class="sub" id="sub"></p></div>
+    <div style="display:flex;gap:8px"><button class="btn">Upload workbook</button><button class="btn primary" id="primary"></button></div>
+  </div>
+  <nav class="tabs" aria-label="Filter by status" id="tabs"></nav>
+  <div class="grid">
+    <section aria-label="Applications needing a person">
+      <div class="tools"><div class="field">Search ID, name, city, PIN, notes…</div><div class="sel"><span>Sort by</span> Urgency ▾</div></div>
+      <table class="list">
+        <thead><tr><th>ID</th><th>Applicant</th><th class="place">City · PIN</th><th>Status</th><th class="why">Why</th><th class="n">Score</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p class="more" id="more"></p>
+    </section>
+    <section class="rail">
+      <h2>Slots by territory <span id="slot-n"></span></h2>
+      <div class="card"><div id="plan"></div></div>
+      <h2>Applications by city <span>slot winners in brackets</span></h2>
+      <div class="card"><div id="cities"></div></div>
+      <h2>Training languages <span id="lang-n"></span></h2>
+      <div class="card"><div class="share" id="share"></div><div class="shareleg" id="shareleg"></div></div>
+    </section>
+  </div>
+</main>
+<script src="charts.js"></script>
+<script type="module">
+  import { load } from './data.js';
+  const D = await load();
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const cls = s => s.replace(/ /g, '-');
+  const empty = D.territories.filter(t => t.slots > t.approved + t.pending);
+  $('n-all').textContent = D.total; $('n-queue').textContent = D.queue.length; $('n-terr').textContent = D.territories.length; $('n-onb').textContent = D.counts['Approved'];
+  $('fresh').textContent = `${D.file} · processed today`;
+  $('primary').textContent = 'Send questions to 12 on hold'.replace('12', D.counts['On hold']);
+  $('sub').innerHTML = `<b>${D.queue.length} need a person</b>, starting with a possible agent-payment fraud. ${D.filled} of ${D.slots} slots are allocated; ${empty.map(t => `${t.id} (${t.city})`).join(', ')} has no eligible applicant yet.`;
+  const tabs = [['Needs a person', D.queue.length], ['All', D.total], ['Approved', D.counts['Approved']], ['Waitlist', D.counts['Waitlist']], ['Not eligible', D.counts['Not eligible']]];
+  $('tabs').innerHTML = tabs.map(([l, n], i) => `<a href="#" ${i === 0 ? 'aria-current="page"' : ''}>${l}<b>${n}</b></a>`).join('');
+  const score = id => D.decisions[id].score;
+  $('rows').innerHTML = D.queue.slice(0, 11).map((q, i) => `<tr class="${i === 0 ? 'sel' : ''}"><td class="mono">${q.id}</td><td>${esc(q.name)}</td><td class="place">${esc(q.city)} · <span class="num">${esc(q.pin)}</span></td><td><span class="pill ${q.fraud ? 'p-fraud' : 'p-' + cls(q.status)}">${q.fraud ? 'Possible fraud' : q.status}</span></td><td class="why" title="${esc(q.why)}">${esc(q.why)}</td><td class="n num">${score(q.id) ? score(q.id).total.toFixed(1) : '<span style="color:var(--muted)">–</span>'}</td><td class="act"><a class="link" href="#">${q.action}</a></td></tr>`).join('');
+  $('more').textContent = `Showing 11 of ${D.queue.length}. Scores show only once an application passes the data check.`;
+  $('slot-n').textContent = `${D.filled} of ${D.slots}`;
+  Charts.plan($('plan'), D.territories.filter(t => t.slots).map(t => ({ label: `${t.id} ${t.city}`, planned: t.slots, spent: t.approved, committed: t.pending })), { format: v => String(v), note: r => r.planned - r.spent - (r.committed || 0) ? `${r.planned - r.spent - (r.committed || 0)} open` : 'full' });
+  Charts.barList($('cities'), D.cities.map(c => ({ label: `${c.label} (${c.winners})`, value: c.value })));
+  const lt = D.languages.reduce((s, l) => s + l.value, 0);
+  const tones = ['var(--chart-1)', '#6fa3b0', '#c7cdc9'];
+  $('lang-n').textContent = `${lt} applicants`;
+  $('share').innerHTML = D.languages.map((l, i) => `<i style="width:${100 * l.value / lt}%;background:${tones[i]}" title="${l.label} ${l.value}"></i>`).join('');
+  $('shareleg').innerHTML = D.languages.map((l, i) => `<div><span><i class="dot" style="background:${tones[i]}"></i>${l.label}</span><b>${l.value}</b> <span style="display:inline">· ${Math.round(100 * l.value / lt)}%</span></div>`).join('');
+</script>
+</body>
+</html>
