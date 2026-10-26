@@ -66,5 +66,5 @@ export async function load() {
 
   const winners = ds.filter(isWinner).sort((a, b) => b.score.total - a.score.total).map(d => ({ id: d.id, name: d.app.name, city: d.app.city, pin: d.app.pin, status: d.status, score: d.score.total, territory: d.territory, weeks: d.plan.weeks, track: d.plan.track?.[0], language: d.app.language, buddy: d.plan.buddy?.id }));
 
-  return { file: 'case1_test_candidates.xlsx', total, counts, territories, slots, filled, bins, scored: scored.length, holdReasons, waitReasons, cities, languages, facts, fraud, flagged, queue, winners, stores: r.stores.length, storeList: r.stores, decisions: r.decisions };
+  return { file: 'case1_test_candidates.xlsx', total, counts, territories, slots, filled, bins, scored: scored.length, holdReasons, waitReasons, cities, languages, facts, fraud, flagged, queue, winners, stores: r.stores.length, storeList: r.stores, decisions: r.decisions, result: r, workbook: wb };
 }

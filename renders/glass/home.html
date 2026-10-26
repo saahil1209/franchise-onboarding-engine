@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InCubeAte · Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: a glass top bar, then a 12-column grid of frosted cards on a soft neutral field. Corporate light look, by choice. */
+  :root {
+    color-scheme: light;
+    --ground: #eef2f6; --ink: #13213a; --muted: #4d5b70; --faint: #5c687a;
+    --glass: rgba(255, 255, 255, 0.58); --glass-strong: rgba(255, 255, 255, 0.82); --edge: rgba(19, 33, 58, 0.10); --edge-hi: rgba(255, 255, 255, 0.9);
+    --blue: #1f5fbf; --amber: #c08417; --red: #c23b3b; --grey: #b8c1cd;
+    --tint: rgba(19, 33, 58, 0.045); --tint-2: rgba(19, 33, 58, 0.08); --track: rgba(19, 33, 58, 0.09);
+    --font: "Manrope", -apple-system, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 14px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+  .num { font-variant-numeric: tabular-nums; }
+  .field { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .field i { position: absolute; border-radius: 50%; filter: blur(110px); }
+  .field i:nth-child(1) { width: 44vw; height: 44vw; left: -10vw; top: -14vw; background: #c9dcf5; opacity: .6; }
+  .field i:nth-child(2) { width: 36vw; height: 36vw; right: -8vw; top: 30vh; background: #e6dccb; opacity: .5; }
+  .field i:nth-child(3) { width: 30vw; height: 30vw; left: 30vw; bottom: -12vw; background: #d3e6ea; opacity: .55; }
+  .glass { position: relative; background: var(--glass); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); border: 1px solid var(--edge); border-top-color: var(--edge-hi); border-radius: 20px; box-shadow: var(--sx, 0px) var(--sy, 14px) var(--sb, 40px) rgba(19, 33, 58, var(--sa, .1)), inset 0 1px 0 rgba(255, 255, 255, .7); }
+  /* Top bar */
+  .top { position: sticky; top: 12px; z-index: 10; margin: 12px max(16px, calc((100% - 1328px) / 2)) 0; height: 60px; display: flex; align-items: center; gap: 22px; padding: 0 16px 0 18px; border-radius: 16px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; white-space: nowrap; }
+  nav.links { display: flex; gap: 4px; }
+  nav.links a { padding: 7px 12px; border-radius: 10px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 13.5px; white-space: nowrap; }
+  nav.links a[aria-current] { background: var(--glass-strong); color: var(--ink); box-shadow: 0 1px 2px rgba(19, 33, 58, .08); }
+  nav.links a:hover { color: var(--ink); }
+  .search { margin-left: auto; width: 260px; height: 36px; border-radius: 10px; background: var(--glass-strong); border: 1px solid var(--edge); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: var(--faint); }
+  .btn { height: 36px; padding: 0 14px; border-radius: 10px; font: inherit; font-weight: 600; border: 1px solid var(--edge); background: var(--glass-strong); color: var(--ink); cursor: pointer; white-space: nowrap; transition: transform 120ms; }
+  .btn:active { transform: scale(.97); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid rgba(31, 95, 191, .45); outline-offset: 2px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: #dbe5f3; color: #1d3c6e; display: grid; place-items: center; font-weight: 700; font-size: 12.5px; flex: none; }
+  main { position: relative; z-index: 1; max-width: 1360px; margin: 0 auto; padding: 22px 16px 40px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+  .c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c4 { grid-column: span 4; } .c5 { grid-column: span 5; } .c7 { grid-column: span 7; } .c6 { grid-column: span 6; }
+  .card { padding: 20px; min-width: 0; }
+  .card > header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  h1 { font-size: 26px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 6px; font-weight: 700; }
+  h2 { font-size: 16px; margin: 0; font-weight: 700; letter-spacing: -0.005em; }
+  .meta { color: var(--faint); font-size: 12.5px; }
+  a.more { color: var(--blue); font-weight: 600; font-size: 13px; text-decoration: none; white-space: nowrap; }
+  /* Welcome row */
+  .hello { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; padding: 22px 24px; }
+  .hello p { margin: 0; color: var(--muted); max-width: 70ch; }
+  .hello p b { color: var(--red); font-weight: 700; }
+  .hello .actions { display: flex; gap: 8px; flex: none; }
+  /* KPI strip: one card split by dividers */
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 0; }
+  .kpi { padding: 16px 20px; }
+  .kpi + .kpi { border-left: 1px solid var(--tint-2); }
+  .kpi span { display: block; color: var(--muted); font-size: 13px; }
+  .kpi b { display: block; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .kpi b small { font-size: 15px; color: var(--faint); font-weight: 600; }
+  .kpi em { font-style: normal; color: var(--faint); font-size: 12.5px; }
+  /* Map card */
+  .c8.mapcard { display: flex; flex-direction: column; }
+  .map { position: relative; flex: 1; min-height: 440px; border-radius: 14px; overflow: hidden; background: rgba(255, 255, 255, .35); }
+  .map canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .city { position: absolute; transform: translate(-50%, -50%); border: 0; padding: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-decoration: none; }
+  .orb { position: relative; display: grid; place-items: center; width: calc(var(--sz) * var(--k, 1)); height: calc(var(--sz) * var(--k, 1)); border-radius: 50%; background: rgba(255, 255, 255, .78); border: 1px solid var(--edge); transform: scale(var(--s, 1)); box-shadow: 0 var(--lift, 5px) calc(var(--lift, 5px) * 3) rgba(19, 33, 58, .16); }
+  .orb svg { position: absolute; inset: -6px; width: calc(100% + 12px); height: calc(100% + 12px); }
+  .orb b { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .city.open .orb::after { content: ""; position: absolute; inset: -11px; border-radius: 50%; border: 1.5px dashed var(--red); }
+  .city .label { position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 3px 9px; border-radius: 999px; background: var(--glass-strong); border: 1px solid var(--edge); font-size: 12px; font-weight: 600; }
+  .city.above .label { top: auto; bottom: calc(100% + 10px); }
+  .city.left .label { top: 50%; left: auto; right: calc(100% + 12px); transform: translateY(-50%); }
+  .city.right .label { top: 50%; left: calc(100% + 12px); transform: translateY(-50%); }
+  .city .label span { color: var(--faint); font-weight: 500; }
+  .tip { position: absolute; z-index: 3; pointer-events: none; padding: 10px 12px; border-radius: 12px; font-size: 12.5px; opacity: 0; transition: opacity 120ms; background: var(--glass-strong); border: 1px solid var(--edge); box-shadow: 0 10px 30px rgba(19, 33, 58, .14); }
+  .tip.on { opacity: 1; }
+  .maplegend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; margin-top: 12px; }
+  .maplegend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  /* Queue */
+  ul.queue { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .queue li { padding: 11px 12px; border-radius: 12px; background: var(--tint); border: 1px solid var(--tint-2); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; }
+  .queue .who { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .queue .why { color: var(--muted); font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .queue .act { grid-row: 2 / span 2; grid-column: 2; align-self: end; color: var(--blue); font-weight: 700; font-size: 12.5px; border: 0; background: none; padding: 0; cursor: pointer; white-space: nowrap; }
+  .tag { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; align-self: start; }
+  .tag.fraud { background: #fbe4e2; color: #8f2424; } .tag.review { background: #fbf0d9; color: #7a5209; } .tag.hold { background: var(--tint-2); color: var(--ink); }
+  /* Charts */
+  .stack { display: flex; height: 14px; gap: 2px; border-radius: 7px; overflow: hidden; margin: 2px 0 14px; }
+  .stack i { display: block; }
+  table.parts { width: 100%; border-collapse: collapse; }
+  .parts td { padding: 8px 0; border-top: 1px solid var(--tint-2); }
+  .parts td.n { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; width: 48px; }
+  .parts td.s { text-align: right; color: var(--faint); font-variant-numeric: tabular-nums; width: 52px; }
+  .parts.tight td { padding: 5px 0; font-size: 13px; }
+  h3.sub { font-size: 13px; font-weight: 700; margin: 16px 0 4px; color: var(--muted); }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; }
+  .onb { list-style: none; margin: 0; padding: 0; }
+  .onb li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 0; border-top: 1px solid var(--tint-2); }
+  .onb li:first-child { border-top: 0; padding-top: 0; }
+  .onb .m { color: var(--muted); font-size: 12.5px; }
+  .onb .wk { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--blue); }
+  /* Ask */
+  .ask form { display: flex; gap: 8px; }
+  .ask input { flex: 1; min-width: 0; height: 42px; border-radius: 12px; border: 1px solid var(--edge); background: var(--glass-strong); padding: 0 14px; font: inherit; color: var(--ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chips button { border: 1px solid var(--edge); background: var(--tint); border-radius: 999px; padding: 5px 11px; font: inherit; font-size: 12.5px; color: var(--ink); cursor: pointer; }
+  .chips button:hover { background: var(--tint-2); }
+  .answer { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: var(--glass-strong); border: 1px solid var(--edge); white-space: pre-wrap; display: none; }
+  .answer.on { display: block; }
+  .answer .q { font-weight: 700; margin-bottom: 6px; }
+  .answer .fx { margin-top: 8px; color: var(--muted); }
+  .activity { list-style: none; margin: 0; padding: 0; }
+  .activity li { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 10px; padding: 9px 0; border-top: 1px solid var(--tint-2); }
+  .activity li:first-child { border-top: 0; padding-top: 0; }
+  .activity i { width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; }
+  .activity span { color: var(--muted); }
+  .activity b { color: var(--ink); font-weight: 600; }
+  footer { grid-column: span 12; color: var(--faint); font-size: 12.5px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 4px 4px 0; }
+  @media (max-width: 1180px) { .search { display: none; } .c8, .c4, .c5, .c7, .c6 { grid-column: span 12; } .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .kpi:nth-child(4) { border-left: 0; } .kpi:nth-child(n+4) { border-top: 1px solid var(--tint-2); } }
+  @media (max-width: 760px) {
+    nav.links { display: none; } .top { gap: 10px; } .top .btn:not(.primary) { display: none; }
+    .hello { flex-direction: column; align-items: flex-start; }
+    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi + .kpi { border-left: 0; } .kpi:nth-child(even) { border-left: 1px solid var(--tint-2); } .kpi:nth-child(n+3) { border-top: 1px solid var(--tint-2); }
+    .map { min-height: 380px; } .orb { --k: .72; } .city .label { font-size: 11px; }
+    .city .label span { display: none; }
+    .city.left .label { top: auto; bottom: calc(100% + 8px); left: 50%; right: auto; transform: translateX(-50%); }
+    .city.right .label { top: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn, .tip { transition: none; } }
+  @media (prefers-reduced-transparency: reduce) { .glass { backdrop-filter: none; -webkit-backdrop-filter: none; background: #ffffff; } }
+</style>
+</head>
+<body>
+<div class="field" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="glass top">
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="#13213a" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="#13213a" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="#1f5fbf"/></svg>InCubeAte</div>
+  <nav class="links" aria-label="Main">
+    <a href="#" aria-current="page">Home</a><a href="#">Applications</a><a href="index.html">Territory map</a><a href="#">Onboarding</a><a href="#">Change history</a>
+  </nav>
+  <div class="search" role="search">Search applicants, PINs, territories</div>
+  <button class="btn">Upload workbook</button>
+  <div class="avatar" title="Expansion team" aria-label="Expansion team">ET</div>
+</header>
+
+<main>
+  <section class="glass hello c12" aria-labelledby="hello-h">
+    <div>
+      <div class="meta" id="date"></div>
+      <h1 id="hello-h">Karnataka expansion</h1>
+      <p id="finding"></p>
+    </div>
+    <div class="actions"><button class="btn">Download decisions</button><button class="btn primary" id="primary"></button></div>
+  </section>
+
+  <section class="glass kpis c12" id="kpis" aria-label="Headline figures"></section>
+
+  <section class="glass card c8 mapcard" aria-labelledby="map-h">
+    <header><h2 id="map-h">Territory map</h2><a class="more" href="index.html">Open full map</a></header>
+    <div class="map" id="map"><canvas id="dots" aria-hidden="true"></canvas><div class="tip" id="tip" role="status"></div></div>
+    <div class="maplegend"><span><i style="background:var(--blue)"></i>Approved slot</span><span><i style="background:var(--amber)"></i>Held for brand review</span><span><i style="border:1.5px dashed var(--red);width:9px;height:9px"></i>Open slot</span><span>Marker size: applications · positions approximate</span></div>
+  </section>
+
+  <section class="glass card c4" aria-labelledby="q-h">
+    <header><h2 id="q-h">Needs a person</h2><span class="meta" id="q-n"></span></header>
+    <ul class="queue" id="queue"></ul>
+    <a class="more" href="#" style="display:inline-block;margin-top:12px" id="q-all"></a>
+  </section>
+
+  <section class="glass card c4" aria-labelledby="p-h">
+    <header><h2 id="p-h">Where the applications are</h2><span class="meta" id="p-n"></span></header>
+    <div class="stack" id="stack"></div>
+    <table class="parts"><tbody id="parts"></tbody></table>
+    <h3 class="sub">Why applications are on hold</h3>
+    <table class="parts tight"><tbody id="holds"></tbody></table>
+  </section>
+
+  <section class="glass card c4" aria-labelledby="s-h">
+    <header><h2 id="s-h">Scores of eligible applicants</h2><span class="meta"><span class="dot" style="background:var(--blue)"></span>holds a slot</span></header>
+    <div id="scores"></div>
+    <p class="meta" id="s-note" style="margin:8px 0 0"></p>
+  </section>
+
+  <section class="glass card c4" aria-labelledby="o-h">
+    <header><h2 id="o-h">Onboarding starts</h2><span class="meta">weeks to opening</span></header>
+    <ul class="onb" id="onb"></ul>
+  </section>
+
+  <section class="glass card ask c7" aria-labelledby="a-h">
+    <header><h2 id="a-h">Ask about an application</h2><span class="meta">answers come from the decision record</span></header>
+    <form id="ask"><input id="q" autocomplete="off" placeholder='e.g. "Why is APP-013 on hold?"' aria-label="Question"><button class="btn primary">Ask</button></form>
+    <div class="chips" id="chips"></div>
+    <div class="answer" id="answer" aria-live="polite"></div>
+  </section>
+
+  <section class="glass card c5" aria-labelledby="act-h">
+    <header><h2 id="act-h">Today</h2><span class="meta" id="act-n"></span></header>
+    <ul class="activity" id="activity"></ul>
+  </section>
+
+  <footer><span id="src"></span><span>Sample applicants for testing. Thresholds are proposed defaults for the brand to confirm.</span></footer>
+</main>
+
+<script type="module">
+  import { load } from '../data.js';
+  import { interpret, applyChanges, applyTerritoryChange, decide, diff, nextHolds } from '../../app/engine.js';
+  const D = await load();
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const decisions = Object.values(D.decisions);
+  const approved = D.counts['Approved'], held = D.filled - approved;
+  const empty = D.territories.filter((t) => t.slots > t.approved + t.pending);
+
+  $('date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  $('finding').innerHTML = `${D.filled} of ${D.slots} slots have a partner. <b>${empty.map((t) => `${t.id} ${t.city}`).join(', ')}</b> is still open: none of its ${empty[0]?.applicants ?? 0} applicants can take it yet. ${D.fraud.length} applicant reports paying an agent.`;
+  $('primary').textContent = `Work through ${D.queue.length}`;
+  const kpi = (l, v, n) => `<div class="kpi"><span>${l}</span><b>${v}</b><em>${n}</em></div>`;
+  $('kpis').innerHTML = kpi('Slots with a partner', `${D.filled}<small> / ${D.slots}</small>`, `${held} held for brand review`)
+    + kpi('Applications', D.total, D.file) + kpi('Needs a person', D.queue.length, `${D.counts['On hold']} on hold, ${D.queue.length - D.counts['On hold']} flagged`)
+    + kpi('Approved', approved, 'pending verification') + kpi('Waitlist', D.counts['Waitlist'], `${D.counts['Not eligible']} not eligible`);
+
+  // Queue
+  const tagOf = (q) => q.fraud ? ['Possible fraud', 'fraud'] : q.status === 'Brand review' ? ['Brand review', 'review'] : q.status === 'On hold' ? ['On hold', 'hold'] : ['Flagged', 'review'];
+  $('q-n').textContent = `${D.queue.length} total`;
+  $('queue').innerHTML = D.queue.slice(0, 5).map((q) => { const [t, c] = tagOf(q); return `<li data-city="${esc(q.city)}"><span class="who">${esc(q.name)}</span><span class="tag ${c}">${t}</span><span class="why">${q.id} · ${esc(q.why)}</span><button class="act" data-id="${q.id}">Explain</button></li>`; }).join('');
+  $('q-all').textContent = `View all ${D.queue.length}`;
+
+  // Pipeline
+  const parts = [['Holding a slot', D.filled, 'var(--blue)'], ['Waitlist', D.counts['Waitlist'], 'var(--grey)'], ['On hold for answers', D.counts['On hold'], 'var(--amber)'], ['Not eligible', D.counts['Not eligible'], 'var(--red)']];
+  console.assert(parts.reduce((s, p) => s + p[1], 0) === D.total, 'parts add up');
+  $('p-n').textContent = `${D.total} applications`;
+  $('stack').innerHTML = parts.map(([l, n, c]) => `<i style="flex:${n};background:${c}" title="${l} ${n}"></i>`).join('');
+  $('parts').innerHTML = parts.map(([l, n, c]) => `<tr><td><span class="dot" style="background:${c}"></span>${l}</td><td class="n">${n}</td><td class="s">${Math.round((100 * n) / D.total)}%</td></tr>`).join('');
+  $('holds').innerHTML = D.holdReasons.map((h) => `<tr><td>${h.label}</td><td class="n">${h.value}</td><td class="s"></td></tr>`).join('');
+
+  // Score bands: stacked columns, slot winners at the base.
+  {
+    const W = 360, H = 230, pl = 24, pb = 22, top = 6, max = Math.max(...D.bins.map((b) => b.n)), yMax = Math.ceil((max + 1) / 2) * 2;
+    const y = (v) => top + (H - pb - top) * (1 - v / yMax), band = (W - pl) / D.bins.length, bw = band * 0.58;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Eligible applicants by score band; slot winners at the base">`;
+    for (let v = 0; v <= yMax; v += 2) s += `<line x1="${pl}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? 'rgba(19,33,58,.08)' : 'rgba(19,33,58,.22)'}"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#7a8698">${v}</text>`;
+    D.bins.forEach((b, i) => {
+      const cx = pl + band * i + band / 2, x = cx - bw / 2;
+      if (b.won) s += `<rect x="${x}" y="${y(b.won)}" width="${bw}" height="${y(0) - y(b.won)}" rx="3" fill="#1f5fbf"><title>${b.label}: ${b.won} hold a slot</title></rect>`;
+      if (b.n - b.won) s += `<rect x="${x}" y="${y(b.n)}" width="${bw}" height="${y(b.won) - y(b.n) - (b.won ? 2 : 0)}" rx="3" fill="#b8c1cd"><title>${b.label}: ${b.n - b.won} waiting</title></rect>`;
+      s += `<text x="${cx}" y="${H - 5}" text-anchor="middle" font-size="11" fill="#7a8698">${b.label}</text>`;
+    });
+    $('scores').innerHTML = s + '</svg>';
+    const ws = D.winners.map((w) => w.score);
+    $('s-note').textContent = `${D.scored} eligible applicants. Slot winners scored ${Math.min(...ws).toFixed(0)}–${Math.max(...ws).toFixed(0)}.`;
+  }
+
+  // Onboarding
+  $('onb').innerHTML = D.winners.filter((w) => w.status === 'Approved').slice(0, 5).map((w) => `<li><span><b>${esc(w.name)}</b> · ${esc(w.city)}</span><span class="wk">${w.weeks} wk</span><span class="m">${w.id} · ${w.track} in ${w.language} · buddy ${w.buddy}</span></li>`).join('');
+
+  // Today: events derived from the decisions themselves.
+  const dup = decisions.filter((d) => d.duplicateOf);
+  const events = [
+    ['var(--blue)', `<b>${D.file}</b> processed: ${D.total} applications, ${D.territories.length} territories, ${D.stores} existing stores.`],
+    ['var(--red)', `<b>${D.fraud.map((d) => d.id).join(', ')}</b> reports paying an agent; flagged for the brand and the applicant warned.`],
+    ['var(--red)', `<b>${empty.map((t) => t.id).join(', ')}</b> has an open slot with nobody eligible yet.`],
+    ['var(--amber)', `<b>${decisions.filter((d) => d.status === 'Brand review').map((d) => d.id).join(', ')}</b> holds a slot pending brand review (next to an existing store).`],
+    ...(dup.length ? [['var(--amber)', `<b>${dup.map((d) => d.id).join(', ')}</b> looks like a duplicate of ${dup.map((d) => d.duplicateOf).join(', ')}; on hold.`]] : []),
+    ['var(--blue)', `<b>${approved} partners</b> approved and given onboarding plans.`],
+  ];
+  $('act-n').textContent = 'since upload';
+  $('activity').innerHTML = events.map(([c, t]) => `<li><i style="background:${c}"></i><span>${t}</span></li>`).join('');
+  $('src').textContent = `${D.file} · ${D.total} applications · ${D.territories.length} territories · ${D.stores} existing stores`;
+
+  // ---- Ask: the real follow-up engine, read-only (changes are previewed, not applied) ----
+  const examples = ['Why is APP-013 on hold?', 'Who won PIN 560041?', 'APP-012 has now found a ground-floor space', 'What payback can APP-023 expect?'];
+  $('chips').innerHTML = examples.map((e) => `<button type="button">${esc(e)}</button>`).join('');
+  const st = { apps: D.workbook.apps, territories: D.workbook.territories, stores: D.workbook.stores };
+  function answer(q) {
+    const r = interpret(q, st.apps, D.result, st.territories);
+    let html = `<div class="q">${esc(q)}</div>`;
+    if (r.type === 'proposal') {
+      const next = { ...st };
+      if (r.kind === 'territory') next.territories = applyTerritoryChange(st.territories, r.target, r.changes); else next.apps = applyChanges(st.apps, r.target, r.changes);
+      const after = decide(next, { held: nextHolds(D.result) });
+      const fx = diff(D.result, after).filter((x) => x.kind === 'status');
+      html += `This would change <b>${r.target}</b>: ${r.changes.map((c) => `${esc(c.field)} ${esc(String(c.from ?? 'blank'))} → <b>${esc(String(c.to ?? 'blank'))}</b>`).join('; ')}.`
+        + (r.warnings?.length ? `<div class="fx">${r.warnings.map(esc).join(' ')}</div>` : '')
+        + `<div class="fx">${fx.length ? fx.map((x) => `${x.id}: ${x.from} → ${x.to}`).join(' · ') : 'No status would change.'} Preview only; apply changes in the Applications screen.</div>`;
+    } else if (r.type === 'undo' || r.type === 'history') html += 'Nothing has changed since the file was uploaded.';
+    else html += esc(r.text);
+    $('answer').innerHTML = html; $('answer').classList.add('on');
+  }
+  $('ask').addEventListener('submit', (e) => { e.preventDefault(); const q = $('q').value.trim(); if (q) answer(q); });
+  $('chips').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { $('q').value = b.textContent; answer(b.textContent); } });
+  answer(examples[0]); $('q').value = examples[0];
+  $('queue').addEventListener('click', (e) => { const b = e.target.closest('.act'); if (b) { const q = `Why is ${b.dataset.id} ${D.decisions[b.dataset.id].status === 'On hold' ? 'on hold' : 'flagged'}?`; $('q').value = q; answer(q); $('answer').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' }); } });
+
+  // ---- Map section: dot field and markers inside the card ----
+  const GEO = { 'Bengaluru': [12.97, 77.59], 'Mysuru': [12.30, 76.64], 'Mangaluru': [12.91, 74.86], 'Hubballi-Dharwad': [15.36, 75.12], 'Belagavi': [15.85, 74.50], 'Tumakuru': [13.34, 77.10], 'Davanagere': [14.46, 75.92] };
+  const cities = Object.keys(GEO).map((name) => {
+    const terr = D.territories.filter((t) => t.city === name);
+    const slots = terr.reduce((s, t) => s + t.slots, 0), filled = terr.reduce((s, t) => s + t.approved + t.pending, 0);
+    return { name, lat: GEO[name][0], lon: GEO[name][1], slots, filled, approved: terr.reduce((s, t) => s + t.approved, 0), open: slots > filled,
+      apps: decisions.filter((d) => (d.app.city || d.app.cityRaw) === name).length, queue: D.queue.filter((q) => q.city === name).length, stores: D.storeList.filter((s) => s.city === name).length };
+  });
+  const map = $('map'), cv = $('dots'), ctx = cv.getContext('2d');
+  map.insertAdjacentHTML('beforeend', cities.map((c) => {
+    const size = 30 + Math.sqrt(c.apps) * 8, r = size / 2 + 3, circ = 2 * Math.PI * r; let off = 0;
+    const arcs = (c.slots ? [[c.approved, 'var(--blue)'], [c.filled - c.approved, 'var(--amber)']] : []).filter(([n]) => n).map(([n, col]) => { const len = circ * (n / c.slots); const s = `<circle cx="${size / 2 + 6}" cy="${size / 2 + 6}" r="${r}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="${Math.max(0, len - 2)} ${circ}" stroke-dashoffset="${-off}" transform="rotate(-90 ${size / 2 + 6} ${size / 2 + 6})" stroke-linecap="round"/>`; off += len; return s; }).join('');
+    return `<a class="city ${c.open ? 'open' : ''} ${{ Tumakuru: 'left', Belagavi: 'above', Bengaluru: 'right' }[c.name] || ''}" href="index.html#${encodeURIComponent(c.name)}" data-city="${esc(c.name)}" aria-label="${esc(c.name)}: ${c.apps} applications, ${c.slots ? `${c.filled} of ${c.slots} slots filled` : 'no open slots'}. Open on the full map"><span class="orb" style="--sz:${size}px"><svg viewBox="0 0 ${size + 12} ${size + 12}" aria-hidden="true">${arcs}</svg><b>${c.apps}</b></span><span class="label">${esc(c.name.replace('Hubballi-Dharwad', 'Hubballi'))} <span>${c.slots ? `${c.filled}/${c.slots}` : '0 slots'}</span></span></a>`;
+  }).join(''));
+  let W = 0, H = 0, dots = [];
+  const mouse = { x: -9999, y: -9999, tx: -9999, ty: -9999 }; // page coordinates
+  const probe = new URLSearchParams(location.search).get('probe');
+  if (probe) { const [x, y] = probe.split(',').map(Number); Object.assign(mouse, { x, y, tx: x, ty: y }); }
+  const LON = [74.3, 77.8], LAT = [12.1, 16.1];
+  function layout() {
+    const r = map.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    dots = []; const gap = W < 500 ? 16 : 20; for (let y = gap / 2; y < H; y += gap) for (let x = gap / 2; x < W; x += gap) dots.push({ x, y });
+    const kx = Math.cos(14 * Math.PI / 180), w = (LON[1] - LON[0]) * kx, h = LAT[1] - LAT[0], pad = W < 560 ? { x: 30, t: 40, b: 46 } : { x: 110, t: 50, b: 56 };
+    const s = Math.min((W - 2 * pad.x) / w, (H - pad.t - pad.b) / h), ox = (W - w * s) / 2, oy = pad.t + ((H - pad.t - pad.b) - h * s) / 2;
+    for (const c of cities) { c.x = ox + (c.lon - LON[0]) * kx * s; c.y = oy + (LAT[1] - c.lat) * s; }
+    map.querySelectorAll('.city').forEach((a) => { const c = cities.find((x) => x.name === a.dataset.city); a.style.left = `${c.x}px`; a.style.top = `${c.y}px`; });
+  }
+  const local = () => { const r = map.getBoundingClientRect(); return { x: mouse.x - r.left, y: mouse.y - r.top }; };
+  function draw() {
+    const m = local(); ctx.clearRect(0, 0, W, H);
+    for (const d of dots) {
+      let city = 0; for (const c of cities) city = Math.max(city, Math.exp(-((d.x - c.x) ** 2 + (d.y - c.y) ** 2) / 4200));
+      const k = Math.exp(-((d.x - m.x) ** 2 + (d.y - m.y) ** 2) / 12000), dx = d.x - m.x, dy = d.y - m.y, dist = Math.hypot(dx, dy) || 1;
+      ctx.fillStyle = k > city ? `rgba(31, 95, 191, ${0.12 + k * 0.5})` : `rgba(80, 98, 122, ${(0.12 + city * 0.22) * 0.8})`;
+      ctx.beginPath(); ctx.arc(d.x + (dx / dist) * k * 6, d.y + (dy / dist) * k * 6, 1 + city * 0.8 + k * 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+    map.querySelectorAll('.city').forEach((a) => { const c = cities.find((x) => x.name === a.dataset.city), p = Math.exp(-((c.x - m.x) ** 2 + (c.y - m.y) ** 2) / 20000), orb = a.firstElementChild; orb.style.setProperty('--s', String(1 + p * 0.16)); orb.style.setProperty('--lift', `${5 + p * 14}px`); });
+  }
+  // Every glass card is lit from the cursor: its shadow falls away from the pointer and deepens as the pointer nears.
+  const glass = [...document.querySelectorAll('.glass')];
+  function light() {
+    const has = mouse.x > -999;
+    for (const el of glass) {
+      const r = el.getBoundingClientRect(), vx = r.left + r.width / 2 - mouse.x, vy = r.top + r.height / 2 - mouse.y, d = Math.hypot(vx, vy) || 1, k = Math.min(1, 380 / d);
+      el.style.setProperty('--sx', `${has ? (vx / d) * 12 * k : 0}px`); el.style.setProperty('--sy', `${has ? (vy / d) * 12 * k + 10 : 14}px`);
+      el.style.setProperty('--sb', `${has ? 36 + 24 * k : 40}px`); el.style.setProperty('--sa', `${has ? 0.08 + 0.08 * k : 0.1}`);
+    }
+  }
+  function frame() { mouse.x += (mouse.tx - mouse.x) * 0.22; mouse.y += (mouse.ty - mouse.y) * 0.22; draw(); light(); if (!reduced) requestAnimationFrame(frame); }
+  addEventListener('pointermove', (e) => { mouse.tx = e.clientX; mouse.ty = e.clientY; if (mouse.x < -999 || reduced) { mouse.x = mouse.tx; mouse.y = mouse.ty; } if (reduced) { draw(); light(); } });
+  document.addEventListener('mouseleave', () => { mouse.tx = mouse.ty = mouse.x = mouse.y = -9999; if (reduced) { draw(); light(); } });
+  $('queue').addEventListener('pointerover', (e) => { const li = e.target.closest('li[data-city]'); const c = li && cities.find((x) => x.name === li.dataset.city); if (c) { const r = map.getBoundingClientRect(); mouse.tx = r.left + c.x; mouse.ty = r.top + c.y; } });
+  const tip = $('tip');
+  map.addEventListener('pointerover', (e) => { const a = e.target.closest('.city'); if (!a) return; const c = cities.find((x) => x.name === a.dataset.city); tip.innerHTML = `<b>${esc(c.name)}</b><br>${c.apps} applications · ${c.queue} need a person<br>${c.slots ? `${c.filled} of ${c.slots} slots filled` : 'No open slots'} · ${c.stores} store${c.stores === 1 ? '' : 's'}`; tip.style.left = `${Math.min(c.x + 40, W - 220)}px`; tip.style.top = `${Math.max(8, c.y - 44)}px`; tip.classList.add('on'); });
+  map.addEventListener('pointerout', (e) => { if (e.target.closest('.city') && !e.relatedTarget?.closest?.('.city')) tip.classList.remove('on'); });
+  addEventListener('resize', () => { layout(); draw(); light(); });
+  addEventListener('scroll', () => { if (reduced) { draw(); light(); } }, { passive: true });
+  layout(); draw(); light();
+  if (!reduced) requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -155,7 +155,7 @@
     <p class="small" style="margin-top:12px">Showing 6 of ${D.queue.length}. Hover a row to find its city on the map.</p>`;
 
   // Right panel: the selected city
-  let selected = 'Bengaluru';
+  let selected = cities.some((c) => '#' + c.name === decodeURIComponent(location.hash)) ? decodeURIComponent(location.hash).slice(1) : 'Bengaluru';
   function renderRight() {
     const c = cities.find((x) => x.name === selected);
     $('right').innerHTML = `
