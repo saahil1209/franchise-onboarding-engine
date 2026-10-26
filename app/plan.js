@@ -1,5 +1,5 @@
 // Step 1: the brand profile, recommendations, refine, and saved runs (Flow A). The engine is flowa.js.
-import { loadPins, recommend, compareRuns, defaultWeights, parsePins, INDUSTRIES, TIERS, FACTOR_LABEL, NO_DATA } from './flowa.js';
+import { loadPins, loadCensus, recommend, compareRuns, defaultWeights, parsePins, INDUSTRIES, TIERS, FACTOR_LABEL, NO_DATA } from './flowa.js';
 import { mountPinMap } from './pinmap.js';
 
 const $ = id => document.getElementById(id);
@@ -9,7 +9,7 @@ const list = s => String(s || '').split(/[,\n;]+/).map(x => x.trim()).filter(Boo
 const pct = x => `${Math.round(x * 100)}%`;
 const time = iso => new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
 
-let base = null, baseLoading = null;
+let base = null, baseLoading = null, data = NO_DATA;
 let P = { runs: [], current: null, editing: true, compare: [] }; // runs: [{ id, at, note, profile, result, ai }]
 let selectedPin = null, map = null, go = () => {};
 
@@ -19,7 +19,14 @@ try { const s = JSON.parse(sessionStorage.getItem(KEY) || 'null'); if (s?.runs) 
 
 async function pins() {
   if (base) return base;
-  baseLoading ||= fetch('data/pins.json').then(r => { if (!r.ok) throw new Error('PIN data missing'); return r.json(); }).then(j => (base = loadPins(j)));
+  const get = f => fetch(f).then(r => { if (!r.ok) throw new Error(`${f} missing`); return r.json(); });
+  baseLoading ||= get('data/pins.json').then(async j => {
+    const b = loadPins(j);
+    // Census is optional: without it, demand shows as not loaded.
+    const census = await get('data/census.json').then(c => loadCensus(c, b)).catch(() => null);
+    data = { ...NO_DATA, census };
+    return (base = b);
+  });
   return baseLoading;
 }
 
@@ -108,7 +115,7 @@ function onProfile(e) {
 
 // ---------- runs ----------
 function addRun(profile, note) {
-  const result = recommend(base, profile, NO_DATA);
+  const result = recommend(base, profile, data);
   const r = { id: `run-${P.runs.length + 1}`, at: result.at, note, profile, result, ai: null };
   P.runs.push(r); P.current = r.id; P.editing = false; selectedPin = result.picks[0]?.pin || null;
   $('profile').dataset.filled = '';
@@ -122,7 +129,7 @@ async function explain(r) {
   const body = {
     brand: { name: r.profile.brand.name, industry: r.profile.brand.industry, tier: r.profile.brand.tier },
     picks: res.picks.slice(0, 10).map(p => ({ pin: p.pin, rank: p.rank, area: `${p.district}, ${p.state}`, score: p.score, confidence: p.confidence,
-      factors: p.factors.map(f => ({ name: FACTOR_LABEL[f.key], value: f.available ? +(f.value * 100).toFixed(0) : null, note: f.why })) })),
+      factors: p.factors.map(f => ({ name: FACTOR_LABEL[f.key], value: f.available ? +(f.value * 100).toFixed(0) : null, note: f.imputed ? 'No data for this PIN; scored at the median of the candidates.' : f.why })) })),
     missing: res.missing,
   };
   try {
@@ -169,7 +176,7 @@ function renderResults() {
   const where = p.goals.states.length ? p.goals.states.join(', ') : 'all of India';
   $('plan-title').textContent = `${p.brand.name}: where to open`;
   $('plan-meta').textContent = `${r.note} · ${time(r.at)} · ${p.brand.industry}, ${p.brand.tier.toLowerCase()} price tier`;
-  const off = (res.picks[0] || res.considered[0])?.factors.filter(f => !f.available).map(f => FACTOR_LABEL[f.key]) || [];
+  const off = (res.picks[0] || res.considered[0])?.factors.filter(f => !f.available && !f.imputed).map(f => FACTOR_LABEL[f.key]) || [];
   $('plan-summary').innerHTML = `${res.picks.length} recommended PIN${res.picks.length === 1 ? '' : 's'} in ${esc(where)}, from ${res.eligible.toLocaleString('en-IN')} eligible of ${res.candidates.toLocaleString('en-IN')} PINs. <b>Scored on ${pct(res.coverage)} of the factor weight.</b>${off.length ? ` Not loaded yet: ${esc(off.join(', '))}. Until they are, the picks rest on the factors that are loaded.` : ''}${res.ties > res.picks.length ? ` <b>${res.ties.toLocaleString('en-IN')} PINs tie on the top score</b>, so the order among them is only by PIN number; loading more data will separate them.` : ''}${res.noCoordinates ? ` ${res.noCoordinates} PIN${res.noCoordinates === 1 ? ' has' : 's have'} no reliable location in the directory and ${res.noCoordinates === 1 ? 'is' : 'are'} left out.` : ''}`;
 
   if (!res.picks.some(x => x.pin === selectedPin) && !res.considered.some(x => x.pin === selectedPin)) selectedPin = res.picks[0]?.pin || null;
@@ -205,11 +212,11 @@ function renderDetail(r) {
   $('pick-detail').innerHTML = `
     <header><h2>PIN ${x.pin} · ${esc(x.district)}</h2><span class="meta">${x.rank ? `rank ${x.rank}` : 'not in the picks'}</span></header>
     <p class="muted">${esc(x.state)} · score ${x.score} / 100 on the loaded factors · confidence ${pct(x.confidence)}${x.blocked ? ` · <b>${esc(x.blocked)}</b>` : ''}</p>
-    <table class="data"><thead><tr><th>Factor</th><th>Weight</th><th style="width:28%">Value</th><th>Why · source</th></tr></thead><tbody>
+    <div class="scroll"><table class="data"><thead><tr><th>Factor</th><th>Weight</th><th style="width:28%">Value</th><th>Why · source</th></tr></thead><tbody>
     ${x.factors.map(f => `<tr class="${f.available ? '' : 'off'}"><td>${esc(FACTOR_LABEL[f.key])}</td><td class="n">${w[f.key]}</td>
-      <td>${f.available ? `<div class="bar" role="img" aria-label="${Math.round(f.value * 100)} of 100"><i style="width:${f.value * 100}%"></i></div><span class="meta">${Math.round(f.value * 100)} · confidence ${pct(f.confidence)}</span>` : '<span class="meta">not loaded</span>'}</td>
+      <td>${f.available ? `<div class="bar" role="img" aria-label="${Math.round(f.value * 100)} of 100"><i style="width:${f.value * 100}%"></i></div><span class="meta">${Math.round(f.value * 100)} · confidence ${pct(f.confidence)}</span>` : f.imputed ? `<span class="meta">no data here · median ${Math.round(f.value * 100)} used</span>` : '<span class="meta">not loaded</span>'}</td>
       <td>${esc(f.why)}${f.available ? `<br><span class="meta">${esc(f.source)} · ${esc(f.level)}</span>` : ''}</td></tr>`).join('')}
-    </tbody></table>
+    </tbody></table></div>
     <p class="meta" style="margin-top:8px">Scores are relative to the other candidate PINs in this run. The platform recommends; your team decides.</p>`;
 }
 
@@ -218,7 +225,8 @@ function renderRefine(r) {
   f.elements.newStores.value = p.goals.newStores; f.elements.minDistance.value = p.guardrails.minDistanceKm;
   f.querySelectorAll('input[name=rarea]').forEach(x => { x.checked = x.value === p.goals.area; });
   $('weights').innerHTML = Object.entries(FACTOR_LABEL).map(([k, label]) => {
-    const loaded = r.result.picks[0]?.factors.find(x => x.key === k)?.available ?? (k === 'distance' || k === 'fit');
+    const fk = r.result.picks[0]?.factors.find(x => x.key === k);
+    const loaded = fk ? (fk.available || !!fk.imputed) : (k === 'distance' || k === 'fit');
     return `<label class="wt ${loaded ? '' : 'off'}"><span>${esc(label)}${loaded ? '' : ' <em>(not loaded)</em>'}</span><input type="range" name="w-${k}" min="0" max="50" step="5" value="${p.weights[k]}"><b>${p.weights[k]}</b></label>`;
   }).join('');
   $('excluded').innerHTML = p.goals.exclude.length ? `Excluded: ${p.goals.exclude.map(x => `<button type="button" class="chipx" data-unexclude="${esc(x)}" title="Remove this exclusion and re-run">${esc(x)} ×</button>`).join(' ')}` : '';

@@ -28,7 +28,7 @@ export const TIERS = { Value: -0.2, Mid: 0, Premium: 0.2 };
 // Approved default weights (docs/DESIGN.md). The brand can change them in Refine.
 export const DEFAULT_WEIGHTS = { demand: 25, spending: 20, engel: 15, competition: 15, cost: 10, distance: 10, fit: 5 };
 export const FACTOR_LABEL = { demand: 'Demand', spending: 'Consumer spending', engel: "Engel's Law fit", competition: 'Competition', cost: 'Cost', distance: 'Distance from own stores', fit: 'Brand fit' };
-// Proposed: a priority nudges the defaults before the brand fine-tunes them.
+// Approved default (docs/DESIGN.md): a priority nudges the weights before the brand fine-tunes them.
 const PRIORITY_SHIFT = { 'Profitability': { spending: 5, cost: 5, demand: -5, distance: -5 }, 'Brand presence': { demand: 5, distance: 5, cost: -5, engel: -5 }, 'Speed': {} };
 
 export function defaultWeights(priority) {
@@ -38,6 +38,29 @@ export function defaultWeights(priority) {
 }
 
 export const parsePins = text => [...new Set(String(text || '').match(/\b\d{6}\b/g) || [])];
+
+// ---------- Census 2011: households per PIN (a modelled estimate) ----------
+// A district's 2011 urban households are split over its present-day PINs by their share of the district's town
+// post offices (head and sub offices); rural households by their share of its village branch offices. Post offices
+// are opened roughly in proportion to population, so this is a proxy, labelled as an estimate.
+// Districts created after 2011 have no figure.
+export function loadCensus(json, base) {
+  const byDistrict = new Map(json.rows.map(([state, district, censusDistrict, match, households, urbanHH, ruralHH, population]) =>
+    [`${state}|${district}`, { censusDistrict, match, households, urbanHH, ruralHH, population }]));
+  const groups = new Map();
+  for (const p of base.pins) { const k = `${p.state}|${p.district}`; (groups.get(k) || groups.set(k, []).get(k)).push(p); }
+  const perPin = new Map();
+  for (const [k, ps] of groups) {
+    const d = byDistrict.get(k); if (!d) continue;
+    const town = ps.reduce((s, p) => s + p.offices - p.branch, 0), village = ps.reduce((s, p) => s + p.branch, 0);
+    for (const p of ps) {
+      const hh = (town ? d.urbanHH * (p.offices - p.branch) / town : 0) + (village ? d.ruralHH * p.branch / village : 0)
+        + (!town ? d.urbanHH / ps.length : 0) + (!village ? d.ruralHH / ps.length : 0);
+      perPin.set(p.pin, { households: Math.round(hh), district: d, among: `${ps.length} PINs by their post offices` });
+    }
+  }
+  return { perPin, source: json.source, districts: byDistrict.size };
+}
 
 // ---------- data sources that are not loaded yet ----------
 // Each loader returns null when its file is absent; the factor is then "not loaded".
@@ -58,23 +81,26 @@ function ctxFor(cands, data) {
   const range = f => { const v = cands.map(f).filter(x => x !== null && x !== undefined); return v.length ? [Math.min(...v), Math.max(...v)] : null; };
   const sector = p => (p.urban >= 0.5 ? 'urban' : 'rural');
   const hcesOf = p => data.hces?.get(`${p.state}|${sector(p)}`) || null;
-  const censusOf = p => data.census?.get(`${p.state}|${p.district}`) || null;
+  const censusOf = p => data.census?.perPin.get(p.pin) || null;
   return {
     hcesOf, censusOf, sector,
     mpce: range(p => hcesOf(p)?.mpce), food: range(p => hcesOf(p)?.foodShare),
-    pop: range(p => censusOf(p)?.population), comp: range(p => data.competition?.get(p.pin)?.count),
+    pop: range(p => { const c = censusOf(p); return c ? Math.log(1 + c.households) : null; }), comp: range(p => data.competition?.get(p.pin)?.count),
     rent: range(p => data.rent?.get(`${p.state}|${p.district}`)?.perSqft),
   };
 }
 
-const missing = (key, need) => ({ key, available: false, value: null, why: `Not loaded yet: needs ${need}.` });
+const missing = (key, need) => ({ key, available: false, value: null, why: `Not available: needs ${need}.` });
 
 export function factors(p, profile, stores, ctx, data) {
   const out = [];
   // Demand: district population from the Census, shared across the district's PINs (a modelled estimate).
   const c = ctx.censusOf(p);
-  out.push(c ? { key: 'demand', available: true, value: lerp(ctx.pop[0], ctx.pop[1], c.population), confidence: 0.5, level: 'District (PIN share estimated)', source: c.source, why: `District population ${c.population.toLocaleString('en-IN')}.` }
-    : missing('demand', 'Census population by district'));
+  out.push(c ? {
+    key: 'demand', available: true, value: +lerp(ctx.pop[0], ctx.pop[1], Math.log(1 + c.households)).toFixed(4),
+    confidence: c.district.match === 'spelling' ? 0.35 : 0.4, level: 'District 2011, split across PINs (estimate)', source: data.census.source,
+    why: `About ${c.households.toLocaleString('en-IN')} households in this PIN (estimate: ${c.district.censusDistrict} had ${c.district.households.toLocaleString('en-IN')} households in 2011, split across ${c.among}).`,
+  } : data.census ? missing('demand', 'a 2011 Census figure for this district (created after 2011)') : missing('demand', 'Census population by district'));
 
   // Consumer spending and Engel's Law fit: HCES by state × rural/urban, applied to the PIN by its sector.
   const h = ctx.hcesOf(p), d = discretionary(profile.brand);
@@ -139,15 +165,24 @@ export function recommend(base, profile, data = NO_DATA) {
   const ctx = ctxFor(cands, data);
   const total = Object.values(weights).reduce((a, b) => a + b, 0);
 
+  // Pass 1: factors for every candidate.
+  const rows = cands.map(p => ({ p, fs: factors(p, profile, stores, ctx, data) }));
+  // A factor loaded for this run but missing for one PIN (e.g. a district created after 2011) is scored at the
+  // candidates' median, at very low confidence, so missing data neither helps nor hurts a PIN's rank.
+  const med = {};
+  for (const k of Object.keys(weights)) {
+    const vals = rows.map(r => r.fs.find(f => f.key === k)).filter(f => f?.available).map(f => f.value).sort((a, b) => a - b);
+    if (vals.length) med[k] = vals[vals.length >> 1];
+  }
   const scored = [];
-  for (const p of cands) {
+  for (const { p, fs } of rows) {
     // Guardrails: deterministic, recorded as the reason a PIN is not eligible.
     let blocked = null;
     if (storePins.has(p.pin)) blocked = 'The brand already has a store in this PIN (one store per PIN).';
     else if (ex.has(p.pin) || ex.has(p.district.toLowerCase())) blocked = 'Excluded by the brand.';
     else { const n = nearestStore(p, stores); if (n && n.km < min) blocked = `Within ${min} km of own store PIN ${n.store.pin} (${n.km.toFixed(1)} km).`; }
-    const fs = factors(p, profile, stores, ctx, data);
-    const used = fs.filter(f => f.available && weights[f.key] > 0);
+    for (const f of fs) if (!f.available && med[f.key] !== undefined) Object.assign(f, { imputed: true, value: med[f.key], confidence: 0.1, why: `${f.why} The median of the candidate PINs is used, so this neither helps nor hurts.` });
+    const used = fs.filter(f => (f.available || f.imputed) && weights[f.key] > 0);
     const wUsed = used.reduce((s, f) => s + weights[f.key], 0);
     const score = wUsed ? +(100 * used.reduce((s, f) => s + weights[f.key] * f.value, 0) / wUsed).toFixed(1) : 0;
     const coverage = total ? wUsed / total : 0;
@@ -192,6 +227,7 @@ export function reasonFor(s, weights) {
 export function whatsMissing(profile, data, stores, unknownStores = []) {
   const out = [];
   if (!data.census) out.push('Census population by district, to estimate demand.');
+  else out.push('Census figures are from 2011; districts created since then have no demand estimate.');
   if (!data.hces) out.push("MoSPI's consumer spending survey by state, for spending level and the Engel's Law fit.");
   if (!data.competition) out.push('Competitor counts from Google Places (needs a working Maps key).');
   if (!data.rent) out.push('Rent figures for your target areas, to compare cost.');

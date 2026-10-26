@@ -89,3 +89,35 @@ test('a PIN the brand is considering is scored and explained even outside the ta
   assert.equal(r.considered[0].state, 'Delhi');
   assert.ok(r.considered[0].reason);
 });
+
+// ---------- Census 2011 ----------
+import { loadCensus } from './flowa.js';
+const censusJson = JSON.parse(readFileSync(new URL('./data/census.json', import.meta.url)));
+const census = loadCensus(censusJson, base);
+const withCensus = { census, hces: null, competition: null, rent: null };
+
+test('census: India total matches the 2011 count; a district\'s PIN estimates add back to its households', () => {
+  // Each 2011 district counted once (a split district can appear under several present-day names).
+  const once = new Map(censusJson.rows.map(r => [`${r[0]}|${r[2]}`, r]));
+  assert.ok([...once.values()].reduce((s, r) => s + r[7], 0) > 1.1e9);
+  const k = 'Karnataka|Bengaluru Urban', d = censusJson.rows.find(r => `${r[0]}|${r[1]}` === k);
+  const sum = base.pins.filter(p => `${p.state}|${p.district}` === k).reduce((s, p) => s + census.perPin.get(p.pin).households, 0);
+  assert.ok(Math.abs(sum - d[4]) / d[4] < 0.01, `${sum} vs ${d[4]}`);
+});
+
+test('census: demand is loaded; a district created after 2011 is scored at the median and labelled', () => {
+  const r = recommend(base, profile({ goals: { states: ['Karnataka'], area: 'Both', newStores: 10 } }), withCensus);
+  const f = r.picks[0].factors.find(x => x.key === 'demand');
+  assert.ok(f.available && f.value >= 0 && f.value <= 1 && /households/.test(f.why));
+  assert.ok(!r.missing.some(m => /^Census population/.test(m)));
+  const pin = base.pins.find(p => p.district === 'Vijaynagar' && p.lat !== null).pin; // created 2021 from Ballari
+  const r2 = recommend(base, profile({ goals: { states: ['Karnataka'], consider: [pin] } }), withCensus);
+  const g = r2.considered[0].factors.find(x => x.key === 'demand');
+  assert.equal(g.available, false); assert.equal(g.imputed, true); assert.match(g.why, /median/);
+});
+
+test('census: with demand weighted alone, most top picks are in the state\'s largest district', () => {
+  const only = { demand: 100, spending: 0, engel: 0, competition: 0, cost: 0, distance: 0, fit: 0 };
+  const r = recommend(base, profile({ brand: { stores: [] }, goals: { states: ['Karnataka'], area: 'Both', newStores: 5 }, weights: only }), withCensus);
+  assert.ok(r.picks.filter(p => p.district === 'Bengaluru Urban').length >= 4, r.picks.map(p => p.district).join(', '));
+});

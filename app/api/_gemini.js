@@ -2,10 +2,13 @@
 // Files starting with "_" in api/ are not routes on Vercel.
 import { GoogleGenAI } from '@google/genai';
 
+// Pinned stable model for the fast tier, checked at ai.google.dev/gemini-api/docs/models on 26 October 2026
+// (docs/DESIGN.md). GEMINI_MODEL_FAST in Vercel overrides it.
+export const DEFAULT_MODEL_FAST = 'gemini-3.5-flash-lite';
+
 export function geminiFromEnv(env = process.env) {
-  const apiKey = String(env.GEMINI_API_KEY || '').trim();
-  // The model ID must be pinned in config (CLAUDE.md, Gemini). No default: an unverified ID could be retired.
-  const model = String(env.GEMINI_MODEL_FAST || '').trim();
+  const apiKey = String(env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '');
+  const model = String(env.GEMINI_MODEL_FAST || DEFAULT_MODEL_FAST).trim();
   if (!apiKey || !model) return { ready: false, missing: [!apiKey && 'GEMINI_API_KEY', !model && 'GEMINI_MODEL_FAST'].filter(Boolean) };
   const ai = new GoogleGenAI({ apiKey });
   return {
