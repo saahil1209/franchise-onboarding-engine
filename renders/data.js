@@ -6,7 +6,7 @@ export const STATUSES = ['Approved', 'Brand review', 'Conditional', 'Waitlist', 
 const byId = (a, b) => a.localeCompare(b, 'en', { numeric: true });
 
 export async function load() {
-  const sheets = await (await fetch('../tests/fixtures/case1_test_candidates.json')).json();
+  const sheets = await (await fetch(new URL('../tests/fixtures/case1_test_candidates.json', import.meta.url))).json();
   const wb = readWorkbook(sheets);
   const r = decide(wb);
   const ds = Object.values(r.decisions).sort((a, b) => byId(a.id, b.id));
@@ -66,5 +66,5 @@ export async function load() {
 
   const winners = ds.filter(isWinner).sort((a, b) => b.score.total - a.score.total).map(d => ({ id: d.id, name: d.app.name, city: d.app.city, pin: d.app.pin, status: d.status, score: d.score.total, territory: d.territory, weeks: d.plan.weeks, track: d.plan.track?.[0], language: d.app.language, buddy: d.plan.buddy?.id }));
 
-  return { file: 'case1_test_candidates.xlsx', total, counts, territories, slots, filled, bins, scored: scored.length, holdReasons, waitReasons, cities, languages, facts, fraud, flagged, queue, winners, stores: r.stores.length, decisions: r.decisions };
+  return { file: 'case1_test_candidates.xlsx', total, counts, territories, slots, filled, bins, scored: scored.length, holdReasons, waitReasons, cities, languages, facts, fraud, flagged, queue, winners, stores: r.stores.length, storeList: r.stores, decisions: r.decisions };
 }

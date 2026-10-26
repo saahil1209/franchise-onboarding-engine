@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InCubeAte · Apple 1 · Inspector</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --window: #f5f5f7; --sidebar: rgba(236, 236, 240, 0.72); --line: rgba(0, 0, 0, 0.08);
+    --label: #1d1d1f; --secondary: rgba(60, 60, 67, 0.72); --tertiary: rgba(60, 60, 67, 0.45);
+    --fill: rgba(120, 120, 128, 0.12); --select: rgba(0, 0, 0, 0.07);
+    --blue: #007aff; --green: #34c759; --orange: #ff9500; --red: #ff3b30; --indigoish: #5ac8fa; --gray: #8e8e93;
+    --toolbar: rgba(255, 255, 255, 0.72);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1e1e1e; --window: #161617; --sidebar: rgba(44, 44, 48, 0.72); --line: rgba(255, 255, 255, 0.1);
+      --label: #f5f5f7; --secondary: rgba(235, 235, 245, 0.62); --tertiary: rgba(235, 235, 245, 0.36);
+      --fill: rgba(120, 120, 128, 0.24); --select: rgba(255, 255, 255, 0.09);
+      --blue: #0a84ff; --green: #30d158; --orange: #ff9f0a; --red: #ff453a; --toolbar: rgba(30, 30, 30, 0.72); }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font: 13px/1.38 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; color: var(--label); background: var(--window); display: grid; grid-template-columns: 248px minmax(0, 1fr) 380px; overflow: hidden; -webkit-font-smoothing: antialiased; }
+  .num { font-variant-numeric: tabular-nums; }
+  /* Sidebar: a heavier material separates structure. */
+  aside { background: var(--sidebar); backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); border-right: 1px solid var(--line); padding: 14px 10px; overflow-y: auto; position: relative; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; padding: 4px 8px 16px; }
+  .group { font-size: 11px; font-weight: 600; color: var(--tertiary); padding: 14px 8px 4px; }
+  .nav { position: relative; }
+  .nav button { all: unset; box-sizing: border-box; width: 100%; height: 28px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border-radius: 6px; cursor: default; position: relative; z-index: 1; }
+  .nav button:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .nav .count { margin-left: auto; color: var(--secondary); font-variant-numeric: tabular-nums; }
+  .nav .glyph { width: 16px; text-align: center; color: var(--blue); }
+  .pill { position: absolute; left: 0; right: 0; height: 28px; border-radius: 6px; background: var(--select); top: 0; will-change: transform; }
+  .ring-mini { flex: none; }
+  /* Middle: list with a translucent toolbar; rows scroll under it. */
+  section.list { background: var(--bg); position: relative; overflow-y: auto; }
+  .toolbar { position: sticky; top: 0; z-index: 2; height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--toolbar); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); }
+  .toolbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px; pointer-events: none; background: linear-gradient(var(--toolbar), transparent); opacity: var(--edge, 0); transition: opacity 150ms; }
+  .toolbar h1 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .toolbar .sub { color: var(--secondary); }
+  .seg { margin-left: auto; position: relative; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--fill); border-radius: 8px; padding: 2px; }
+  .seg button { all: unset; position: relative; z-index: 1; padding: 3px 12px; font-weight: 500; text-align: center; cursor: default; }
+  .seg button:focus-visible { outline: 2px solid var(--blue); border-radius: 6px; }
+  .seg .thumb { position: absolute; top: 2px; bottom: 2px; left: 2px; border-radius: 6px; background: var(--bg); box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.06); will-change: transform; }
+  .finding { margin: 6px 16px 10px; padding: 12px 14px; border-radius: 10px; background: var(--fill); display: flex; gap: 10px; align-items: flex-start; }
+  .finding b { font-weight: 600; }
+  ol.rows:focus { outline: none; }
+  ol.rows { list-style: none; margin: 0; padding: 0 8px 24px; }
+  .rows li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; cursor: default; }
+  .rows li + li { margin-top: 1px; }
+  .rows li[aria-selected="true"] { background: var(--blue); color: #fff; }
+  .rows li[aria-selected="true"] .meta, .rows li[aria-selected="true"] .score { color: rgba(255,255,255,.85); }
+  .rows .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .rows .name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rows .meta { color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+  .rows .score { color: var(--secondary); font-variant-numeric: tabular-nums; text-align: right; }
+  /* Inspector */
+  section.inspector { background: var(--window); border-left: 1px solid var(--line); overflow-y: auto; }
+  .ins { padding: 20px 20px 32px; will-change: transform, opacity; }
+  .ins header { display: flex; gap: 16px; align-items: center; margin-bottom: 18px; }
+  .ins h2 { font-size: 22px; line-height: 1.15; letter-spacing: -0.02em; font-weight: 700; margin: 0; }
+  .ins .id { color: var(--secondary); margin-top: 2px; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; margin-top: 6px; }
+  .card { background: var(--bg); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .card h3 { font-size: 13px; font-weight: 600; margin: 0 0 10px; }
+  .headline { margin: 0; }
+  .bars { display: grid; gap: 7px; }
+  .bar { display: grid; grid-template-columns: 116px minmax(0, 1fr) 64px; gap: 10px; align-items: center; }
+  .bar .track { height: 6px; border-radius: 3px; background: var(--fill); overflow: hidden; }
+  .bar .track i { display: block; height: 100%; border-radius: 3px; background: var(--blue); transform-origin: left; }
+  .bar span:last-child { text-align: right; color: var(--secondary); font-variant-numeric: tabular-nums; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .checks li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; }
+  .checks .ok { color: var(--green); font-weight: 700; } .checks .no { color: var(--red); font-weight: 700; }
+  .checks small { display: block; color: var(--secondary); font-size: 12px; }
+  .steps { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .steps li::marker { color: var(--tertiary); }
+  .muted { color: var(--secondary); }
+  @media (max-width: 1000px) { body { grid-template-columns: 200px minmax(0, 1fr); } section.inspector { display: none; } }
+  @media (max-width: 640px) { body { grid-template-columns: 1fr; } aside { display: none; } }
+  @media (prefers-reduced-transparency: reduce) { aside, .toolbar { backdrop-filter: none; -webkit-backdrop-filter: none; } aside { background: var(--window); } .toolbar { background: var(--bg); } }
+</style>
+</head>
+<body>
+<aside aria-label="Sidebar">
+  <div class="brand"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="currentColor" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="var(--blue)"/></svg>InCubeAte</div>
+  <div class="nav" id="nav"><div class="pill" id="pill"></div></div>
+</aside>
+<section class="list" id="listpane" aria-label="Applications">
+  <div class="toolbar" id="toolbar">
+    <div><h1 id="list-title"></h1><div class="sub" id="list-sub"></div></div>
+    <div class="seg" role="radiogroup" aria-label="Sort" id="seg"><div class="thumb" id="thumb"></div><button role="radio" data-sort="urgency">Urgency</button><button role="radio" data-sort="score">Score</button><button role="radio" data-sort="id">ID</button></div>
+  </div>
+  <div class="finding" id="finding"></div>
+  <ol class="rows" id="rows" role="listbox" aria-label="Applicants" tabindex="0"></ol>
+</section>
+<section class="inspector" aria-label="Inspector"><div class="ins" id="ins"></div></section>
+
+<script type="module">
+  import { load } from '../data.js';
+  import { spring, pressable } from './spring.js';
+  const D = await load();
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const all = Object.values(D.decisions).sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
+  const colour = { Approved: 'var(--green)', 'Brand review': 'var(--orange)', Conditional: 'var(--indigoish)', Waitlist: 'var(--gray)', 'On hold': 'var(--orange)', 'Not eligible': 'var(--red)', Withdrawn: 'var(--gray)' };
+  const queueIds = new Set(D.queue.map((q) => q.id));
+  const urgency = new Map(D.queue.map((q, i) => [q.id, i]));
+
+  // Sidebar: specific labels (what is in the list), counts on the queues that need action.
+  const views = [
+    { key: 'queue', label: 'Needs a person', glyph: '●', filter: (d) => queueIds.has(d.id) },
+    { key: 'slot', label: 'Holding a slot', glyph: '◆', filter: (d) => ['Approved', 'Brand review', 'Conditional'].includes(d.status) },
+    { key: 'Waitlist', label: 'Waitlist', glyph: '◷', filter: (d) => d.status === 'Waitlist' },
+    { key: 'Not eligible', label: 'Not eligible', glyph: '–', filter: (d) => d.status === 'Not eligible' },
+    { key: 'all', label: 'All applications', glyph: '≡', filter: () => true },
+    ...D.territories.map((t) => ({ key: t.id, label: `${t.id} ${t.city.replace('Hubballi-Dharwad', 'Hubballi')}`, territory: t, filter: (d) => t.pins.includes(d.app.pin) })),
+  ];
+  const ring = (frac, size, stroke, col) => { const r = (size - stroke) / 2, c = 2 * Math.PI * r; return `<svg class="ring-mini" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${stroke}"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c * frac} ${c}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`; };
+  $('nav').insertAdjacentHTML('beforeend', views.map((v, i) => {
+    const head = i === 0 ? '<div class="group">Pipeline</div>' : i === 5 ? '<div class="group">Territories</div>' : '';
+    const t = v.territory;
+    const lead = t ? ring(t.slots ? (t.approved + t.pending) / t.slots : 0, 16, 3, t.slots && t.approved + t.pending < t.slots ? 'var(--red)' : 'var(--blue)') : `<span class="glyph" aria-hidden="true">${v.glyph}</span>`;
+    const count = t ? `${t.approved + t.pending}/${t.slots}` : all.filter(v.filter).length;
+    return `${head}<button data-view="${i}">${lead}<span>${esc(v.label)}</span><span class="count">${count}</span></button>`;
+  }).join(''));
+
+  let view = 0, sortKey = 'urgency', rows = [], sel = 0;
+  const pill = spring({ value: 0, damping: 1, response: 0.32, precision: 0.2, onUpdate: (y) => { $('pill').style.transform = `translateY(${y}px)`; } });
+  const placePill = (instant) => { const b = $('nav').querySelector(`[data-view="${view}"]`); const y = b.offsetTop; instant ? pill.set(y) : pill.to(y); };
+
+  const seg = [...$('seg').querySelectorAll('button')];
+  const thumb = spring({ value: 0, damping: 1, response: 0.3, precision: 0.2, onUpdate: (x) => { $('thumb').style.transform = `translateX(${x}px)`; } });
+  const placeThumb = (instant) => { const b = seg.find((s) => s.dataset.sort === sortKey); $('thumb').style.width = `${b.offsetWidth}px`; instant ? thumb.set(b.offsetLeft - 2) : thumb.to(b.offsetLeft - 2); seg.forEach((s) => s.setAttribute('aria-checked', s === b)); };
+
+  function renderList() {
+    const v = views[view];
+    rows = all.filter(v.filter);
+    rows.sort(sortKey === 'score' ? (a, b) => (b.score?.total ?? -1) - (a.score?.total ?? -1) : sortKey === 'id' ? () => 0 : (a, b) => (urgency.get(a.id) ?? 99) - (urgency.get(b.id) ?? 99) || (b.score?.total ?? -1) - (a.score?.total ?? -1));
+    $('list-title').textContent = v.label;
+    $('list-sub').textContent = `${rows.length} application${rows.length === 1 ? '' : 's'}`;
+    $('rows').innerHTML = rows.map((d, i) => `<li role="option" data-i="${i}" aria-selected="${i === sel}"><span class="dot" style="background:${colour[d.status]}"></span><div><div class="name">${esc(d.app.name || '(name blank)')}</div><div class="meta">${d.id} · ${esc(d.app.city || d.app.cityRaw)} ${esc(d.app.pin || d.app.pinRaw)} · ${d.status}</div></div><span class="score">${d.score ? d.score.total.toFixed(1) : '—'}</span></li>`).join('');
+    renderInspector(true);
+  }
+
+  // Inspector: content slides in from the right, the same side it leaves by, on a critically damped spring.
+  const insX = spring({ value: 0, damping: 1, response: 0.3, precision: 0.1, onUpdate: (x) => { $('ins').style.transform = `translateX(${x}px)`; $('ins').style.opacity = String(1 - Math.min(1, Math.abs(x) / 30)); } });
+  function renderInspector(animate) {
+    const d = rows[sel];
+    if (!d) { $('ins').innerHTML = '<p class="muted">Nothing in this list.</p>'; return; }
+    const a = d.app, s = d.score;
+    const big = s ? (() => { const size = 92, st = 10, r = (size - st) / 2, c = 2 * Math.PI * r; return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Score ${s.total} out of 100"><circle cx="46" cy="46" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${st}"/><circle cx="46" cy="46" r="${r}" fill="none" stroke="var(--blue)" stroke-width="${st}" stroke-linecap="round" stroke-dasharray="${c * s.total / 100} ${c}" transform="rotate(-90 46 46)"/><text x="46" y="51" text-anchor="middle" font-size="19" font-weight="700" fill="currentColor" style="font-variant-numeric:tabular-nums">${Math.round(s.total)}</text></svg>`; })() : '';
+    $('ins').innerHTML = `
+      <header>${big}<div><h2>${esc(a.name || '(name blank)')}</h2><div class="id">${d.id} · ${esc(a.city || a.cityRaw)} · PIN ${esc(a.pin || a.pinRaw)}</div><div class="status" style="color:${colour[d.status]}">● ${d.status}</div></div></header>
+      <div class="card"><p class="headline">${esc(d.headline)}</p></div>
+      ${d.review.length ? `<div class="card"><h3>For the brand to decide</h3>${d.review.map((r) => `<p style="margin:0 0 6px">${esc(r.text)}</p>`).join('')}</div>` : ''}
+      ${s ? `<div class="card"><h3>Score ${s.total} of 100${d.rank ? ` · rank ${d.rank} of ${d.rankOf} in ${d.territory}` : ''}</h3><div class="bars">${s.parts.map((p) => `<div class="bar"><span>${p.factor}</span><span class="track"><i style="transform:scaleX(${p.points / p.max})"></i></span><span>${p.points}/${p.max}</span></div>`).join('')}</div></div>` : ''}
+      <div class="card"><h3>Checks, in order</h3><ul class="checks">${d.checks.map((c) => `<li><span class="${c.pass ? 'ok' : 'no'}" aria-label="${c.pass ? 'passed' : 'failed'}">${c.pass ? '✓' : '✕'}</span><span>${esc(c.name)}<small>${esc(c.detail)}</small></span></li>`).join('')}</ul></div>
+      <div class="card"><h3>${d.plan.weeks ? `Onboarding · about ${d.plan.weeks} weeks` : 'Next steps'}</h3><ol class="steps">${d.plan.steps.slice(0, 6).map((p) => `<li>${esc(p.text)} <span class="muted">· ${esc(p.state)}</span></li>`).join('') || '<li class="muted">Nothing further.</li>'}</ol></div>`;
+    if (animate) { insX.set(18); insX.to(0); }
+  }
+
+  function select(i) {
+    sel = Math.max(0, Math.min(rows.length - 1, i));
+    $('rows').querySelectorAll('li').forEach((li, k) => li.setAttribute('aria-selected', k === sel));
+    $('rows').children[sel]?.scrollIntoView({ block: 'nearest' });
+    renderInspector(true);
+  }
+
+  // Feedback on pointer-down: selection follows the press, not the release.
+  $('rows').addEventListener('pointerdown', (e) => { const li = e.target.closest('li'); if (li) select(+li.dataset.i); });
+  $('rows').addEventListener('keydown', (e) => { if (e.key === 'ArrowDown') { e.preventDefault(); select(sel + 1); } if (e.key === 'ArrowUp') { e.preventDefault(); select(sel - 1); } });
+  $('nav').addEventListener('pointerdown', (e) => { const b = e.target.closest('button'); if (!b) return; view = +b.dataset.view; sel = 0; placePill(); renderList(); });
+  $('nav').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { const b = e.target.closest('button'); if (b) { e.preventDefault(); view = +b.dataset.view; sel = 0; placePill(); renderList(); } } });
+  $('seg').addEventListener('pointerdown', (e) => { const b = e.target.closest('button'); if (!b) return; sortKey = b.dataset.sort; placeThumb(); sel = 0; renderList(); });
+  seg.forEach((b) => pressable(b, 0.96));
+  $('listpane').addEventListener('scroll', () => $('toolbar').style.setProperty('--edge', $('listpane').scrollTop > 4 ? 1 : 0));
+
+  const empty = D.territories.filter((t) => t.slots > t.approved + t.pending);
+  $('finding').innerHTML = `<span style="color:var(--red)">●</span><span><b>${D.filled} of ${D.slots} slots are allocated.</b> ${empty.map((t) => `${t.id} ${t.city}`).join(', ')} is still open: none of its ${empty[0]?.applicants ?? 0} applicants can take it yet. ${D.fraud.length} applicant says they paid an agent.</span>`;
+  renderList(); placePill(true); placeThumb(true);
+  $('rows').focus({ preventScroll: true });
+</script>
+</body>
+</html>

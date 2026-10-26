@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InCubeAte · Apple 2 · Territory board</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f2f2f7; --card: #ffffff; --label: #1c1c1e; --secondary: rgba(60, 60, 67, 0.7); --tertiary: rgba(60, 60, 67, 0.4);
+    --fill: rgba(120, 120, 128, 0.14); --line: rgba(60, 60, 67, 0.12);
+    --blue: #007aff; --green: #34c759; --orange: #ff9500; --red: #ff3b30; --gray: #8e8e93; --teal: #30b0c7;
+    --bar: rgba(242, 242, 247, 0.78); --sheet: #ffffff; --scrim: rgba(0, 0, 0, 0.32);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000000; --card: #1c1c1e; --label: #ffffff; --secondary: rgba(235, 235, 245, 0.62); --tertiary: rgba(235, 235, 245, 0.32);
+      --fill: rgba(120, 120, 128, 0.3); --line: rgba(84, 84, 88, 0.6); --blue: #0a84ff; --green: #30d158; --orange: #ff9f0a; --red: #ff453a; --teal: #40c8e0;
+      --bar: rgba(22, 22, 24, 0.78); --sheet: #1c1c1e; --scrim: rgba(0, 0, 0, 0.55); }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--label); font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .num { font-variant-numeric: tabular-nums; }
+  /* Translucent bar: content scrolls under it; an edge fade appears only once something is underneath. */
+  .bar { position: sticky; top: 0; z-index: 5; height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 28px; background: var(--bar); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); }
+  .bar .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 16px; }
+  .bar .small-title { margin-left: auto; margin-right: auto; font-weight: 600; opacity: var(--t, 0); transition: opacity 160ms; }
+  .bar .who { color: var(--secondary); font-size: 14px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 4px 28px 48px; }
+  h1 { font-size: 34px; line-height: 1.1; letter-spacing: -0.022em; font-weight: 700; margin: 6px 0 4px; }
+  .lede { color: var(--secondary); margin: 0 0 20px; max-width: 760px; }
+  .lede b { color: var(--label); font-weight: 600; }
+  .summary { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; background: var(--card); border-radius: 18px; padding: 20px 24px; margin-bottom: 22px; }
+  .legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .legend div span { display: block; color: var(--secondary); font-size: 13px; }
+  .legend div b { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .terr { all: unset; box-sizing: border-box; background: var(--card); border-radius: 18px; padding: 16px; cursor: default; display: grid; gap: 12px; will-change: transform; }
+  .terr:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .terr .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .terr h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .terr .city { color: var(--secondary); font-size: 14px; }
+  .chip { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: var(--fill); color: var(--secondary); white-space: nowrap; }
+  .chip.high { color: var(--blue); background: color-mix(in srgb, var(--blue) 14%, transparent); }
+  .terr .mid { display: flex; align-items: center; gap: 12px; }
+  .terr .mid .k b { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .terr .mid .k span { display: block; color: var(--secondary); font-size: 13px; }
+  .terr .open { color: var(--red); font-weight: 600; font-size: 13px; }
+  .strip { height: 22px; position: relative; }
+  .strip .axis { position: absolute; left: 0; right: 0; top: 10px; height: 2px; border-radius: 1px; background: var(--fill); }
+  .strip i { position: absolute; top: 5px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; border: 2px solid var(--gray); background: var(--card); }
+  .strip i.won { border-color: var(--blue); background: var(--blue); }
+  .terr .foot { color: var(--secondary); font-size: 13px; }
+  /* Sheet: a modal task, so the page dims behind it. */
+  .scrim { position: fixed; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; z-index: 10; }
+  .sheet { position: fixed; left: 50%; bottom: 0; width: min(760px, 100%); height: min(86vh, 820px); margin-left: calc(min(760px, 100%) / -2); background: var(--sheet); border-radius: 22px 22px 0 0; z-index: 11; transform: translateY(110%); box-shadow: 0 -10px 40px rgba(0,0,0,.18); display: flex; flex-direction: column; touch-action: none; }
+  .grabber { flex: none; height: 28px; display: grid; place-items: center; cursor: grab; }
+  .grabber span { width: 38px; height: 5px; border-radius: 3px; background: var(--fill); }
+  .sheet .content { overflow-y: auto; padding: 0 24px 32px; touch-action: pan-y; }
+  .sheet h3 { font-size: 26px; letter-spacing: -0.02em; margin: 0 0 2px; }
+  .sheet .sub { color: var(--secondary); margin: 0 0 18px; }
+  .sheet h4 { font-size: 15px; margin: 20px 0 10px; }
+  .close { position: absolute; right: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--fill); color: var(--secondary); font-size: 16px; cursor: default; }
+  .pins { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .pin { border-radius: 12px; padding: 10px 12px; background: var(--fill); }
+  .pin b { font-variant-numeric: tabular-nums; display: block; }
+  .pin span { color: var(--secondary); font-size: 13px; }
+  .pin.taken { background: color-mix(in srgb, var(--blue) 16%, transparent); }
+  .pin.store { background: var(--fill); }
+  .pin.store b { color: var(--secondary); }
+  .rank { display: grid; gap: 8px; }
+  .rank .r { display: grid; grid-template-columns: 74px minmax(0, 1fr) 52px; gap: 10px; align-items: center; }
+  .rank .r .t { height: 22px; border-radius: 6px; background: var(--fill); position: relative; overflow: hidden; }
+  .rank .r .t i { position: absolute; inset: 0 auto 0 0; border-radius: 6px; background: var(--gray); opacity: .5; }
+  .rank .r.won .t i { background: var(--blue); opacity: 1; }
+  .rank .r .t span { position: absolute; left: 8px; top: 2px; font-size: 13px; font-weight: 500; white-space: nowrap; color: var(--label); }
+  .rank .r.won .t span { color: #fff; }
+  .rank .r b { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .others { list-style: none; margin: 0; padding: 0; }
+  .others li { padding: 10px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 74px 1fr; gap: 10px; }
+  .others li span:last-child { color: var(--secondary); }
+  @media (max-width: 980px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .legend { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { main { padding: 4px 16px 40px; } .bar { padding: 0 16px; } .grid { grid-template-columns: 1fr; } .summary { grid-template-columns: 1fr; justify-items: start; } h1 { font-size: 30px; } .bar .who { display: none; } }
+  @media (prefers-reduced-transparency: reduce) { .bar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--bg); } }
+</style>
+</head>
+<body>
+<div class="bar" id="bar">
+  <div class="brand"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="currentColor" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="var(--blue)"/></svg>InCubeAte</div>
+  <div class="small-title">Territories</div>
+  <div class="who">Karnataka expansion</div>
+</div>
+<main>
+  <h1 id="h1">Territories</h1>
+  <p class="lede" id="lede"></p>
+  <section class="summary" aria-label="Slots across all territories"><div id="bigring"></div><div class="legend" id="legend"></div></section>
+  <section class="grid" id="grid" aria-label="Territories"></section>
+</main>
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+  <div class="grabber" id="grabber"><span></span></div>
+  <button class="close" id="close" aria-label="Close">✕</button>
+  <div class="content" id="sheet-body"></div>
+</section>
+
+<script type="module">
+  import { load } from '../data.js';
+  import { spring, pressable, project, rubberband, tracker } from './spring.js';
+  const D = await load();
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const decisions = Object.values(D.decisions);
+  const empty = D.territories.filter((t) => t.slots > t.approved + t.pending);
+  $('lede').innerHTML = `<b>${D.filled} of ${D.slots} slots</b> have a partner across ${D.territories.length} territories. ${empty.map((t) => `${t.id} ${t.city}`).join(', ')} is still open. Tap a territory to see who competed for it.`;
+
+  // Activity-style ring: allocated slots, approved inside held.
+  const ring = (size, stroke, parts) => { const r = (size - stroke) / 2, c = 2 * Math.PI * r; let off = 0; return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${parts.map((p) => `${p.label} ${p.n}`).join(', ')}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${stroke}"/>${parts.map((p) => { const len = c * p.frac; const s = `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${p.col}" stroke-width="${stroke}" stroke-linecap="${parts.length > 1 ? 'butt' : 'round'}" stroke-dasharray="${Math.max(0, len - (parts.length > 1 ? 2 : 0))} ${c}" stroke-dashoffset="${-off}" transform="rotate(-90 ${size / 2} ${size / 2})"/>`; off += len; return s; }).join('')}</svg>`; };
+  const approved = D.counts['Approved'], held = D.filled - approved, open = D.slots - D.filled;
+  $('bigring').innerHTML = ring(132, 16, [{ label: 'Approved', n: approved, frac: approved / D.slots, col: 'var(--blue)' }, { label: 'Held for brand review', n: held, frac: held / D.slots, col: 'var(--orange)' }]);
+  $('legend').innerHTML = [['Approved', approved, 'var(--blue)'], ['Held for review', held, 'var(--orange)'], ['Open', open, 'var(--fill)'], ['Applicants', D.total, null]]
+    .map(([l, n, c]) => `<div><span>${c ? `<i style="background:${c}"></i>` : ''}${l}</span><b>${n}</b></div>`).join('');
+
+  const x = (s) => `${((s - 40) / 60) * 100}%`;
+  $('grid').innerHTML = D.territories.map((t, i) => {
+    const comp = decisions.filter((d) => d.territory === t.id && d.score);
+    const won = new Set(t.winners.map((w) => w.id));
+    const filled = t.approved + t.pending;
+    const parts = [{ label: 'Approved', n: t.approved, frac: t.slots ? t.approved / t.slots : 0, col: 'var(--blue)' }, { label: 'Held', n: t.pending, frac: t.slots ? t.pending / t.slots : 0, col: 'var(--orange)' }].filter((p) => p.n);
+    return `<button class="terr" data-i="${i}" aria-haspopup="dialog">
+      <div class="top"><div><h2>${t.id}</h2><div class="city">${esc(t.city)}</div></div><span class="chip ${t.priority === 'High' ? 'high' : ''}">${t.priority}</span></div>
+      <div class="mid">${ring(56, 8, parts.length ? parts : [{ label: 'Open', n: 0, frac: 0, col: 'var(--fill)' }])}<div class="k"><b>${filled}/${t.slots}</b><span>slots filled</span>${t.slots && filled < t.slots ? '<div class="open">Open slot</div>' : ''}</div></div>
+      <div class="strip" aria-label="Scores of ${comp.length} eligible contenders">${comp.length ? '<div class="axis"></div>' + comp.map((d) => `<i class="${won.has(d.id) ? 'won' : ''}" style="left:${x(d.score.total)}" title="${d.id} ${d.score.total}"></i>`).join('') : '<div class="axis"></div>'}</div>
+      <div class="foot">${comp.length} eligible · ${t.applicants} applied</div>
+    </button>`;
+  }).join('');
+  document.querySelectorAll('.terr').forEach((el) => pressable(el, 0.97));
+
+  // ---- Sheet ----
+  const sheet = $('sheet'), scrim = $('scrim');
+  let H = () => sheet.offsetHeight;
+  const pos = spring({ value: 1, damping: 1, response: 0.4, precision: 0.5, onUpdate: (y) => { sheet.style.transform = `translateY(${y}px)`; scrim.style.opacity = String(Math.max(0, 1 - y / H())); } , onRest: () => { if (!isOpen) sheet.style.visibility = 'hidden'; } });
+  let opener = null, isOpen = false;
+  pos.set(H() + 40); sheet.style.visibility = 'hidden';
+
+  function fill(t) {
+    const comp = decisions.filter((d) => d.territory === t.id && d.score).sort((a, b) => a.rank - b.rank);
+    const won = new Set(t.winners.map((w) => w.id));
+    const pinState = t.pins.map((p) => {
+      const s = D.storeList.find((x) => x.pin === p);
+      const w = t.winners.find((w) => w.pin === p);
+      return s ? { p, cls: 'store', txt: `Store ${s.id}` } : w ? { p, cls: 'taken', txt: `${w.id} · ${w.status}` } : { p, cls: '', txt: 'Free' };
+    });
+    const others = decisions.filter((d) => t.pins.includes(d.app.pin) && !d.score);
+    $('sheet-body').innerHTML = `
+      <h3 id="sheet-title">${t.id} · ${esc(t.city)}</h3>
+      <p class="sub">${t.priority} priority · ${t.slots} slot${t.slots === 1 ? '' : 's'} · ${t.applicants} applicants</p>
+      <h4>PIN codes</h4>
+      <div class="pins">${pinState.map((s) => `<div class="pin ${s.cls}"><b>${s.p}</b><span>${esc(s.txt)}</span></div>`).join('')}</div>
+      <h4>Eligible contenders, by score</h4>
+      ${comp.length ? `<div class="rank">${comp.map((d) => `<div class="r ${won.has(d.id) ? 'won' : ''}"><span class="num">${d.id}</span><div class="t"><i style="width:${d.score.total}%"></i><span>${esc(d.app.name)} · PIN ${d.app.pin}</span></div><b>${d.score.total.toFixed(1)}</b></div>`).join('')}</div><p class="sub" style="margin-top:10px">Blue holds a slot. Slots go by score, one store per PIN; ties go to the lower ID.</p>` : '<p class="sub">Nobody eligible yet.</p>'}
+      ${others.length ? `<h4>Applied here but not competing yet</h4><ul class="others">${others.map((d) => `<li><span class="num">${d.id}</span><span>${esc(d.app.name || '(name blank)')}: ${esc(d.headline)}</span></li>`).join('')}</ul>` : ''}`;
+  }
+
+  function openSheet(i, from) {
+    opener = from; fill(D.territories[i]);
+    sheet.setAttribute('aria-hidden', 'false'); sheet.style.visibility = 'visible'; scrim.style.pointerEvents = 'auto'; isOpen = true;
+    pos.to(0); $('close').focus({ preventScroll: true });
+  }
+  function closeSheet(velocity) {
+    isOpen = false; scrim.style.pointerEvents = 'none'; sheet.setAttribute('aria-hidden', 'true');
+    pos.to(H() + 40, { velocity }); opener?.focus({ preventScroll: true });
+  }
+  $('grid').addEventListener('click', (e) => { const b = e.target.closest('.terr'); if (b) openSheet(+b.dataset.i, b); });
+  $('close').addEventListener('click', () => closeSheet());
+  scrim.addEventListener('click', () => closeSheet());
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeSheet(); });
+  // A link like 2-board.html#TER-03 opens that territory directly.
+  const hashIdx = D.territories.findIndex((t) => '#' + t.id === location.hash);
+  if (hashIdx >= 0) openSheet(hashIdx, document.querySelectorAll('.terr')[hashIdx]);
+
+  // Drag: 1:1 from where it was grabbed, rubber-band above the top, project the flick, hand off velocity.
+  const v = tracker();
+  let dragging = false, startY = 0, startPos = 0;
+  $('grabber').addEventListener('pointerdown', (e) => { dragging = true; try { $('grabber').setPointerCapture(e.pointerId); } catch {} startY = e.clientY; startPos = pos.value; v.reset(); v.add(e.clientY); pos.set(pos.value); });
+  $('grabber').addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    v.add(e.clientY);
+    let y = startPos + (e.clientY - startY);
+    if (y < 0) y = rubberband(y, H());
+    pos.set(y);
+  });
+  const end = () => {
+    if (!dragging) return; dragging = false;
+    const vel = v.velocity();
+    const landing = pos.value + project(vel);
+    if (landing > H() * 0.5) closeSheet(vel); else pos.to(0, { velocity: vel });
+  };
+  $('grabber').addEventListener('pointerup', end);
+  $('grabber').addEventListener('pointercancel', end);
+
+  // The large title hands over to the bar's title once it scrolls under the bar.
+  addEventListener('scroll', () => $('bar').style.setProperty('--t', scrollY > 40 ? 1 : 0), { passive: true });
+</script>
+</body>
+</html>

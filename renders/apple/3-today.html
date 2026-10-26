@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InCubeAte · Apple 3 · Today</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f2f2f7; --card: #ffffff; --label: #000000; --secondary: rgba(60, 60, 67, 0.68); --tertiary: rgba(60, 60, 67, 0.36);
+    --fill: rgba(120, 120, 128, 0.14); --line: rgba(60, 60, 67, 0.12);
+    --blue: #007aff; --green: #34c759; --orange: #ff9500; --red: #ff3b30; --gray: #8e8e93; --mint: #00c7be; --gray3: #c7c7cc;
+    --bar: rgba(249, 249, 249, 0.8);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000000; --card: #1c1c1e; --label: #ffffff; --secondary: rgba(235, 235, 245, 0.62); --tertiary: rgba(235, 235, 245, 0.3);
+      --fill: rgba(120, 120, 128, 0.32); --line: rgba(84, 84, 88, 0.6); --blue: #0a84ff; --green: #30d158; --orange: #ff9f0a; --red: #ff453a; --mint: #63e6e2; --gray3: #48484a;
+      --bar: rgba(30, 30, 30, 0.82); }
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; color: var(--label); font: 17px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .device { position: relative; width: min(440px, 100%); height: 100dvh; margin: 0 auto; background: var(--bg); overflow: hidden; }
+  .screen { height: 100%; overflow-y: auto; padding-bottom: 104px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .nav { position: sticky; top: 0; z-index: 5; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: 600; background: transparent; }
+  .nav.scrolled { background: var(--bar); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); }
+  .nav span { opacity: 0; transition: opacity 160ms; }
+  .nav.scrolled span { opacity: 1; }
+  header { padding: 0 20px 14px; }
+  .date { color: var(--secondary); font-size: 13px; font-weight: 600; }
+  h1 { font-size: 34px; line-height: 1.12; letter-spacing: -0.022em; font-weight: 700; margin: 2px 0 0; display: flex; align-items: center; gap: 10px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 16px; }
+  .w { background: var(--card); border-radius: 22px; padding: 14px; will-change: transform; min-width: 0; }
+  .w.wide { grid-column: span 2; }
+  .w .cap { font-size: 13px; font-weight: 600; color: var(--secondary); display: flex; align-items: center; gap: 6px; }
+  .w .big { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
+  .w .big small { font-size: 17px; color: var(--secondary); font-weight: 600; }
+  .w p { margin: 4px 0 0; font-size: 15px; color: var(--secondary); }
+  .slots { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; margin-top: 8px; }
+  .tlist { display: grid; gap: 7px; font-size: 13px; }
+  .tlist div { display: grid; grid-template-columns: 52px 1fr 26px; gap: 8px; align-items: center; }
+  .tlist .t { height: 6px; border-radius: 3px; background: var(--fill); overflow: hidden; display: flex; gap: 1px; }
+  .tlist .t i { display: block; height: 100%; }
+  .tlist b { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .stack { display: flex; height: 14px; gap: 2px; border-radius: 7px; overflow: hidden; margin: 12px 0 10px; }
+  .stack i { display: block; }
+  .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: 15px; }
+  .keys div { display: flex; justify-content: space-between; }
+  .keys span { display: flex; align-items: center; gap: 6px; color: var(--secondary); }
+  .keys i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .keys b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .cols { display: flex; align-items: flex-end; gap: 10px; height: 110px; margin-top: 12px; }
+  .cols div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .cols .c { width: 100%; border-radius: 6px 6px 3px 3px; background: var(--gray3); display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+  .cols .c i { display: block; background: var(--blue); }
+  .cols small { font-size: 11px; color: var(--secondary); font-variant-numeric: tabular-nums; }
+  .cols b { font-size: 13px; font-variant-numeric: tabular-nums; }
+  h2 { font-size: 22px; letter-spacing: -0.015em; margin: 26px 20px 10px; display: flex; justify-content: space-between; align-items: baseline; }
+  h2 a { font-size: 17px; font-weight: 400; color: var(--blue); text-decoration: none; }
+  /* Carousel: dragged 1:1, flick projected to the nearest card, rubber-band at the ends. */
+  .carousel { overflow: hidden; padding: 0 16px; touch-action: pan-y; cursor: grab; }
+  .track { display: flex; gap: 12px; will-change: transform; }
+  .q { flex: 0 0 calc(100% - 44px); background: var(--card); border-radius: 22px; padding: 16px; user-select: none; }
+  .q .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .q .who { font-weight: 600; }
+  .q .id { color: var(--secondary); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .q p { color: var(--secondary); font-size: 15px; margin: 8px 0 12px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 3.9em; }
+  .tag { font-size: 13px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .act { all: unset; display: block; text-align: center; padding: 10px; border-radius: 12px; background: var(--fill); color: var(--blue); font-weight: 600; cursor: default; will-change: transform; }
+  .dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--gray3); }
+  .dots i.on { background: var(--label); }
+  .ring3 { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; margin-top: 8px; }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; height: 82px; padding-bottom: 26px; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--bar); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border-top: 0.5px solid var(--line); z-index: 6; }
+  .tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 10px; font-weight: 500; color: var(--gray); text-decoration: none; }
+  .tabbar a[aria-current] { color: var(--blue); }
+  .tabbar svg { width: 24px; height: 24px; }
+  @media (min-width: 700px) { html { background: #d9d9de; } body { min-height: 100vh; display: grid; place-items: center; } .device { height: 860px; border-radius: 46px; outline: 11px solid #1c1c1e; } }
+  @media (min-width: 700px) and (prefers-color-scheme: dark) { html { background: #2c2c2e; } }
+  @media (prefers-reduced-transparency: reduce) { .nav.scrolled, .tabbar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--card); } }
+</style>
+</head>
+<body>
+<div class="device"><div class="screen" id="screen">
+<div class="nav" id="nav"><span>Today</span></div>
+<header>
+  <div class="date" id="date"></div>
+  <h1><svg width="28" height="28" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="currentColor" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="var(--blue)"/></svg>Today</h1>
+</header>
+
+<main class="grid">
+  <section class="w wide" aria-labelledby="w-slots"><div class="cap" id="w-slots">Slots with a partner</div><div class="slots"><div id="ring"></div><div class="tlist" id="tlist"></div></div><p id="slot-note"></p></section>
+  <section class="w" aria-labelledby="w-need"><div class="cap" id="w-need" style="color:var(--orange)">Needs you</div><div class="big" id="need"></div><p id="need-note"></p></section>
+  <section class="w" aria-labelledby="w-ready"><div class="cap" id="w-ready" style="color:var(--green)">Ready to onboard</div><div class="big" id="ready"></div><p>approved, about 11 weeks to opening</p></section>
+  <section class="w wide" aria-labelledby="w-pipe"><div class="cap" id="w-pipe" style="display:block">Where the <span id="total"></span> applications are</div><div class="stack" id="stack"></div><div class="keys" id="keys"></div></section>
+  <section class="w wide" aria-labelledby="w-score"><div class="cap" id="w-score">Scores of eligible applicants</div><div class="cols" id="cols"></div><p id="score-note"></p></section>
+</main>
+
+<h2>Needs a person <a href="#" id="seeall"></a></h2>
+<div class="carousel" id="carousel" aria-roledescription="carousel"><div class="track" id="track"></div></div>
+<div class="dots" id="dots" aria-hidden="true"></div>
+
+<div class="grid" style="margin-top:14px">
+  <section class="w wide" aria-labelledby="w-lang"><div class="cap" id="w-lang">Training languages</div><div class="ring3"><div id="lring"></div><div class="keys" id="lkeys" style="grid-template-columns:1fr"></div></div></section>
+</div>
+
+</div>
+<nav class="tabbar" aria-label="Tabs">
+  <a href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Today</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9"/></svg>Applications</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Territories</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Onboarding</a>
+</nav>
+</div>
+
+<script type="module">
+  import { load } from '../data.js';
+  import { spring, pressable, project, rubberband, tracker } from './spring.js';
+  const D = await load();
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  $('date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+
+  const arc = (size, stroke, parts, centre) => { const r = (size - stroke) / 2, c = 2 * Math.PI * r; let off = 0; return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${parts.map((p) => `${p.label} ${p.n}`).join(', ')}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${stroke}"/>${parts.map((p) => { const len = c * p.frac; const s = `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${p.col}" stroke-width="${stroke}" stroke-dasharray="${Math.max(0, len - 3)} ${c}" stroke-dashoffset="${-off}" transform="rotate(-90 ${size / 2} ${size / 2})"/>`; off += len; return s; }).join('')}${centre || ''}</svg>`; };
+  const approved = D.counts['Approved'], held = D.filled - approved;
+  $('ring').innerHTML = arc(120, 14, [{ label: 'Approved', n: approved, frac: approved / D.slots, col: 'var(--blue)' }, { label: 'Held', n: held, frac: held / D.slots, col: 'var(--orange)' }],
+    `<text x="60" y="62" text-anchor="middle" font-size="28" font-weight="700" fill="currentColor" style="font-variant-numeric:tabular-nums">${D.filled}</text><text x="60" y="80" text-anchor="middle" font-size="12" fill="var(--secondary)">of ${D.slots}</text>`);
+  $('tlist').innerHTML = D.territories.filter((t) => t.slots).map((t) => `<div><span>${t.id}</span><span class="t" aria-hidden="true">${[...Array(t.slots)].map((_, k) => `<i style="flex:1;background:${k < t.approved ? 'var(--blue)' : k < t.approved + t.pending ? 'var(--orange)' : 'transparent'}"></i>`).join('')}</span><b style="color:${t.approved + t.pending < t.slots ? 'var(--red)' : 'inherit'}">${t.approved + t.pending}/${t.slots}</b></div>`).join('');
+  const empty = D.territories.filter((t) => t.slots > t.approved + t.pending);
+  $('slot-note').innerHTML = `${empty.map((t) => `<b style="color:var(--red)">${t.id} ${t.city}</b>`).join(', ')} is still open: none of its ${empty[0]?.applicants ?? 0} applicants can take it yet.`;
+
+  $('need').innerHTML = `${D.queue.length}`;
+  $('need-note').textContent = `${D.fraud.length} possible fraud, ${D.counts['On hold']} on hold`;
+  $('ready').textContent = approved;
+
+  const parts = [['Holding a slot', D.filled, 'var(--blue)'], ['Waitlist', D.counts['Waitlist'], 'var(--gray3)'], ['On hold', D.counts['On hold'], 'var(--orange)'], ['Not eligible', D.counts['Not eligible'], 'var(--red)']];
+  console.assert(parts.reduce((s, p) => s + p[1], 0) === D.total, 'parts add up');
+  $('total').textContent = D.total;
+  $('stack').innerHTML = parts.map(([l, n, c]) => `<i style="flex:${n};background:${c}" title="${l} ${n}"></i>`).join('');
+  $('keys').innerHTML = parts.map(([l, n, c]) => `<div><span><i style="background:${c}"></i>${l}</span><b>${n}</b></div>`).join('');
+
+  const maxN = Math.max(...D.bins.map((b) => b.n));
+  $('cols').innerHTML = D.bins.map((b) => `<div><b>${b.n}</b><span class="c" style="height:${(b.n / maxN) * 80}%" title="${b.label}: ${b.won} hold a slot of ${b.n}"><i style="height:${b.n ? (b.won / b.n) * 100 : 0}%"></i></span><small>${b.label.split('–')[0]}</small></div>`).join('');
+  const ws = D.winners.map((w) => w.score);
+  $('score-note').innerHTML = `<span style="color:var(--blue)">Blue</span> holds a slot. Winners scored ${Math.min(...ws).toFixed(0)}–${Math.max(...ws).toFixed(0)} of ${D.scored} eligible.`;
+
+  const lt = D.languages.reduce((s, l) => s + l.value, 0), lc = ['var(--blue)', 'var(--mint)', 'var(--gray3)'];
+  $('lring').innerHTML = arc(96, 14, D.languages.map((l, i) => ({ label: l.label, n: l.value, frac: l.value / lt, col: lc[i] })));
+  $('lkeys').innerHTML = D.languages.map((l, i) => `<div><span><i style="background:${lc[i]}"></i>${l.label}</span><b>${l.value} · ${Math.round((100 * l.value) / lt)}%</b></div>`).join('');
+
+  // ---- Carousel ----
+  const items = D.queue.slice(0, 8);
+  $('seeall').textContent = `See all ${D.queue.length}`;
+  const tag = (q) => q.fraud ? ['Possible fraud', 'var(--red)'] : q.status === 'Brand review' ? ['Brand review', 'var(--orange)'] : q.status === 'On hold' ? ['On hold', 'var(--gray)'] : ['Flagged', 'var(--orange)'];
+  $('track').innerHTML = items.map((q) => { const [t, c] = tag(q); return `<article class="q"><div class="row"><div><div class="who">${esc(q.name)}</div><div class="id">${q.id} · ${esc(q.city)} ${esc(q.pin)}</div></div><span class="tag" style="color:${c};background:color-mix(in srgb, ${c} 15%, transparent)">${t}</span></div><p>${esc(q.why)}</p><button class="act">${q.action}</button></article>`; }).join('');
+  $('dots').innerHTML = items.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('');
+  document.querySelectorAll('.w, .act').forEach((el) => pressable(el, 0.97));
+
+  const track = $('track'), car = $('carousel');
+  const stepW = () => track.children[0].offsetWidth + 12;
+  const minX = () => -(items.length - 1) * stepW();
+  let index = 0;
+  const xs = spring({ value: 0, damping: 0.86, response: 0.38, precision: 0.3, onUpdate: (x) => { track.style.transform = `translateX(${x}px)`; } });
+  const markDot = () => $('dots').querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === index));
+  const v = tracker();
+  let down = false, sx = 0, sy = 0, base = 0, axis = null;
+  car.addEventListener('pointerdown', (e) => { down = true; axis = null; sx = e.clientX; sy = e.clientY; base = xs.value; v.reset(); v.add(e.clientX); xs.set(xs.value); try { car.setPointerCapture(e.pointerId); } catch {} });
+  car.addEventListener('pointermove', (e) => {
+    if (!down) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (!axis) { if (Math.hypot(dx, dy) < 10) return; axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'; }
+    if (axis !== 'x') return;
+    v.add(e.clientX);
+    let x = base + dx;
+    if (x > 0) x = rubberband(x, car.offsetWidth); else if (x < minX()) x = minX() + rubberband(x - minX(), car.offsetWidth);
+    xs.set(x);
+  });
+  const release = () => {
+    if (!down) return; down = false;
+    if (axis !== 'x') return;
+    const vel = v.velocity();
+    const landing = xs.value + project(vel, 0.99);
+    index = Math.max(0, Math.min(items.length - 1, Math.round(-landing / stepW())));
+    xs.to(-index * stepW(), { velocity: vel }); markDot();
+  };
+  car.addEventListener('pointerup', release); car.addEventListener('pointercancel', release);
+  car.tabIndex = 0;
+  car.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { index = Math.max(0, Math.min(items.length - 1, index + (e.key === 'ArrowRight' ? 1 : -1))); xs.to(-index * stepW()); markDot(); } });
+
+  $("screen").addEventListener("scroll", () => $("nav").classList.toggle("scrolled", $("screen").scrollTop > 30), { passive: true });
+</script>
+</body>
+</html>
