@@ -15,7 +15,7 @@ Everything runs in the visitor's browser tab, so:
 - `map.js`: the territory map. Google Maps when the deployment provides a key; otherwise a drawn schematic of the cities.
 - `api/maps-config.js`: a Vercel function that gives the page the Maps key from the project's environment variables.
 - `app.js` and `index.html`: the page, in the glass design from `renders/glass/`. Views: Home, Applications, Territories, History & rules.
-- `sample.js`: a provisional 23-row test workbook built from the brief's column list. Every row plants one edge case. The page has "Try with sample data" and "Download sample .xlsx" buttons.
+- `sample.js`: a provisional 23-row test workbook built from the brief's column list. Every row plants one edge case. Used by the tests only; the page has no sample-data option.
 - `engine.test.js` and `dashboard.test.js`: the tests. Run them with `node --test`.
 
 ## Run locally
@@ -43,11 +43,11 @@ Before you share the link, open it in a private window and run the judge walkthr
 
 ## Judge walkthrough
 
-1. Upload the workbook, or click "Try with sample data".
+1. Upload the workbook.
 2. Home shows the headline figures, the territory map, who needs a person, and onboarding starts. Click a city on the map for its territories and ranked applicants. **Work through** opens the most urgent application.
 3. Applications shows every decision. Click a row to see its checks in order, the score breakdown, the plan and a draft message to the applicant. **Download decisions** exports them as .xlsx.
 4. On Home, ask "Why is APP-007 on hold?" or "What would APP-007 need to change to move forward?".
-5. Type "APP-012 has now found a ground-floor space". The page shows the proposed field change and the effect on every applicant. Click **Apply change**. In the sample, APP-012 moves from Waitlist to Approved and APP-013 is bumped from Conditional to Waitlist (a knock-on effect). The change is recorded in Change history.
+5. Type "APP-012 has now found a ground-floor space". The page shows the proposed field change and the effect on every applicant. Click **Apply change**. In the sample workbook (`sample.js`), APP-012 moves from Waitlist to Approved and APP-013 is bumped from Conditional to Waitlist (a knock-on effect). The change is recorded in Change history.
 
 ## Test kit
 

@@ -1,5 +1,4 @@
 import { readWorkbook, decide, interpret, applyChanges, applyTerritoryChange, diff, why, nextHolds, summaryFacts, isWinner, CONFIG, FIELD_LABEL, STATUS_RANK, idNum } from './engine.js';
-import { SAMPLE_SHEETS } from './sample.js';
 import { overview, finding } from './dashboard.js';
 import { mountMap } from './map.js';
 
@@ -118,12 +117,6 @@ for (const input of document.querySelectorAll('input.file')) input.addEventListe
     showProblems([{ fatal: true, text: `Couldn't read ${f.name}: ${err.message}` }]);
   }
   e.target.value = '';
-});
-$('sample').addEventListener('click', () => load(SAMPLE_SHEETS, 'Sample workbook'));
-$('download-sample').addEventListener('click', () => {
-  const book = XLSX.utils.book_new();
-  for (const [n, rows] of Object.entries(SAMPLE_SHEETS)) XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(rows), n);
-  XLSX.writeFile(book, 'case1-sample.xlsx');
 });
 $('reset').addEventListener('click', () => {
   if (!confirm('Clear this session? The uploaded data, decisions, changes and chat will be removed from this tab.')) return;
