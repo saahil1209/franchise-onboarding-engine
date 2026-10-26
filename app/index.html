@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Franchise Onboarding Engine</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d2320; --muted: #5f6a64; --line: #e2e0d8; --accent: #1f6f5c; --accent-ink: #fff;
+    --ok: #1f7a4d; --ok-bg: #e3f3ea; --cond: #8a5a00; --cond-bg: #fbf0d9; --hold: #3d5a99; --hold-bg: #e5ecfa;
+    --wait: #6b5b8c; --wait-bg: #eee9f6; --no: #a33a2f; --no-bg: #f8e4e1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #151917; --panel: #1d2320; --ink: #e8ece9; --muted: #9aa69f; --line: #2f3833; --accent: #4fb596; --accent-ink: #0d1411;
+      --ok: #6fd3a0; --ok-bg: #1d3328; --cond: #f0c26a; --cond-bg: #3a2f17; --hold: #9db8f2; --hold-bg: #1f2a40; --wait: #c4b4e6; --wait-bg: #2c2638; --no: #f19a8f; --no-bg: #3d2320; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 0 0 12px; }
+  h3 { font-size: 14px; margin: 16px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  p { margin: 0 0 8px; }
+  .muted { color: var(--muted); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  button, .btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary, .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button:focus-visible, input:focus-visible, tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover, tr.sel { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .scroll { overflow-x: auto; }
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .s-Approved { color: var(--ok); background: var(--ok-bg); }
+  .s-Conditional { color: var(--cond); background: var(--cond-bg); }
+  .s-On-hold { color: var(--hold); background: var(--hold-bg); }
+  .s-Waitlist { color: var(--wait); background: var(--wait-bg); }
+  .s-Not-eligible { color: var(--no); background: var(--no-bg); }
+  .counts button { display: flex; flex-direction: column; align-items: flex-start; min-width: 110px; }
+  .counts button b { font-size: 22px; }
+  .counts button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .checks { list-style: none; padding: 0; margin: 0; }
+  .checks li { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+  .pass { color: var(--ok); font-weight: 700; } .fail { color: var(--no); font-weight: 700; }
+  .state { font-size: 12px; padding: 1px 8px; border-radius: 6px; border: 1px solid var(--line); white-space: nowrap; }
+  .state-Completed { color: var(--ok); border-color: var(--ok); }
+  .state-Needs-brand-approval { color: var(--cond); border-color: var(--cond); }
+  .state-Outstanding { color: var(--hold); border-color: var(--hold); }
+  pre { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px; font: 13px/1.5 ui-monospace, Menlo, monospace; margin: 0; }
+  .chat { max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .msg { padding: 10px 12px; border-radius: 10px; white-space: pre-wrap; max-width: 92%; }
+  .msg.you { align-self: flex-end; background: color-mix(in srgb, var(--accent) 15%, transparent); }
+  .msg.bot { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); }
+  .msg .row { margin-top: 10px; }
+  .ask { display: flex; gap: 8px; }
+  .ask input { flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .problems li { margin-bottom: 4px; }
+  .fatal { color: var(--no); }
+  .empty { padding: 32px; text-align: center; color: var(--muted); }
+  .sticky { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+  @media (max-width: 900px) { .sticky { position: static; max-height: none; } }
+  label.file { display: inline-block; }
+  label.file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  label.file:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+  .hidden { display: none !important; }
+  footer { margin-top: 24px; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Franchise Onboarding Engine</h1>
+  <p class="muted">Upload the applications workbook. Every applicant gets a status, the reason, and next steps. Ask about any decision or give new facts below. Everything runs in this browser tab; nothing is uploaded or stored.</p>
+
+  <section class="card">
+    <div class="row">
+      <label class="file btn primary">Upload Excel workbook<input id="file" type="file" accept=".xlsx,.xls,.csv"></label>
+      <button id="sample">Try with sample data</button>
+      <button id="download-sample">Download sample .xlsx</button>
+      <span id="filename" class="muted"></span>
+    </div>
+    <ul id="problems" class="problems hidden"></ul>
+  </section>
+
+  <div id="results" class="hidden">
+    <section class="card">
+      <div id="counts" class="row counts"></div>
+    </section>
+
+    <section class="card">
+      <h2>Ask about a decision, or give new information</h2>
+      <div id="chat" class="chat" aria-live="polite"></div>
+      <form id="ask" class="ask">
+        <input id="q" autocomplete="off" placeholder='e.g. "Why is APP-007 on hold?" or "APP-012 has now found a ground-floor space"' aria-label="Question or new information">
+        <button class="primary">Send</button>
+      </form>
+      <div class="row" style="margin-top:8px" id="examples"></div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Applications</h2>
+        <div class="scroll"><table>
+          <thead><tr><th>ID</th><th>Applicant</th><th>City · PIN</th><th>Status</th><th>Score</th><th>Reason</th></tr></thead>
+          <tbody id="apps"></tbody>
+        </table></div>
+      </section>
+      <section class="card sticky" id="detail"><div class="empty">Select an application to see its decision, evidence and plan.</div></section>
+    </div>
+
+    <section class="card">
+      <h2>Territories</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>Territory</th><th>City</th><th>Priority</th><th>Slots</th><th>Allocated</th><th>Waitlisted</th></tr></thead>
+        <tbody id="terr"></tbody>
+      </table></div>
+    </section>
+
+    <section class="card">
+      <h2>Change history</h2>
+      <ul id="history" class="muted"><li>No changes yet.</li></ul>
+    </section>
+  </div>
+
+  <footer class="card muted" id="rules"></footer>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
