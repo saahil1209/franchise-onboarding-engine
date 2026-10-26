@@ -8,6 +8,10 @@ const short = n => n.replace('Hubballi-Dharwad', 'Hubballi');
 
 // ---------- Google loader (one attempt per page) ----------
 let googleReady = null;
+// Google calls gm_authFailure when it refuses the key, which can happen after the map has been drawn.
+const authFailed = new Set();
+let authFailure = null;
+window.gm_authFailure = () => { authFailure = 'Google rejected the Maps key'; for (const f of authFailed) f(); };
 export function loadGoogle() {
   if (googleReady) return googleReady;
   googleReady = (async () => {
@@ -18,7 +22,6 @@ export function loadGoogle() {
     await new Promise((resolve, reject) => {
       const cb = `__gmaps${Date.now()}`;
       window[cb] = () => { delete window[cb]; resolve(); };
-      window.gm_authFailure = () => reject(new Error('Google rejected the key'));
       const s = document.createElement('script');
       s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=weekly&loading=async&libraries=marker&callback=${cb}`;
       s.async = true; s.onerror = () => reject(new Error('Maps script failed to load'));
@@ -52,13 +55,22 @@ export function mountMap(el, { onPick }) {
   const tip = document.createElement('div'); tip.className = 'tip'; tip.setAttribute('role', 'status'); el.append(tip);
   const note = el.parentElement.querySelector('[data-map-note]');
 
-  const schematic = createSchematic(el, tip, onPick);
-  impl = schematic;
+  impl = createSchematic(el, tip, onPick);
+  const fallBack = () => {
+    if (!impl.google) return;
+    impl.destroy();
+    impl = createSchematic(el, tip, onPick);
+    impl.set(cities, selected);
+    if (note) note.textContent = "Google Maps couldn't load; showing the drawn map · positions approximate";
+  };
   loadGoogle().then(({ mapId }) => {
+    if (authFailure) return;
     try {
-      impl = createGoogle(el, tip, onPick, mapId);
-      schematic.destroy();
+      const g = createGoogle(el, tip, onPick, mapId);
+      impl.destroy();
+      impl = g;
       impl.set(cities, selected);
+      authFailed.add(fallBack);
       if (note) note.textContent = 'Google Maps · marker size: applications · city-level positions';
     } catch { /* keep the schematic */ }
   }).catch(() => { /* no key or blocked: the schematic stays */ });
@@ -75,6 +87,8 @@ function createGoogle(el, tip, onPick, mapId) {
   const map = new g.Map(holder, { center: { lat: 14.1, lng: 76.1 }, zoom: 7, mapId, disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative', clickableIcons: false });
   let markers = [], fitted = false;
   return {
+    google: true,
+    destroy() { for (const m of markers) m.map = null; holder.remove(); },
     set(cities, selected) {
       for (const m of markers) m.map = null;
       markers = cities.map(c => {
