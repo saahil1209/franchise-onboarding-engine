@@ -43,6 +43,14 @@
   .s-On-hold { color: var(--hold); background: var(--hold-bg); }
   .s-Waitlist { color: var(--wait); background: var(--wait-bg); }
   .s-Not-eligible { color: var(--no); background: var(--no-bg); }
+  .s-Brand-review { color: var(--cond); background: var(--cond-bg); outline: 1px dashed var(--cond); }
+  .s-Withdrawn { color: var(--muted); background: var(--bg); border: 1px solid var(--line); }
+  button.link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 700; text-decoration: underline; }
+  .warn { color: var(--cond); }
+  .flags { padding-left: 0; list-style: none; color: var(--cond); }
+  .attention li, .flags li { margin-bottom: 6px; }
+  .small { font-size: 12px; }
+  #rules ol { padding-left: 20px; }
   .counts button { display: flex; flex-direction: column; align-items: flex-start; min-width: 110px; }
   .counts button b { font-size: 22px; }
   .counts button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -78,14 +86,15 @@
 <body>
 <main>
   <h1>Franchise Onboarding Engine</h1>
-  <p class="muted">Upload the applications workbook. Every applicant gets a status, the reason, and next steps. Ask about any decision or give new facts below. Everything runs in this browser tab; nothing is uploaded or stored.</p>
+  <p class="muted">Upload the applications workbook. Every applicant gets a status, the reason, and next steps. Ask about any decision or give new facts below. Everything runs in this browser tab: nothing is sent to a server, and the session is kept only in this tab until you close it or press Start over.</p>
 
   <section class="card">
     <div class="row">
       <label class="file btn primary">Upload Excel workbook<input id="file" type="file" accept=".xlsx,.xls,.csv"></label>
       <button id="sample">Try with sample data</button>
       <button id="download-sample">Download sample .xlsx</button>
-      <span id="filename" class="muted"></span>
+      <button id="reset" class="hidden">Start over</button>
+      <span id="filename" class="muted" aria-live="polite"></span>
     </div>
     <ul id="problems" class="problems hidden"></ul>
   </section>
@@ -93,6 +102,11 @@
   <div id="results" class="hidden">
     <section class="card">
       <div id="counts" class="row counts"></div>
+    </section>
+
+    <section class="card" aria-labelledby="summary-title">
+      <h2 id="summary-title">Today's summary</h2>
+      <div id="summary"></div>
     </section>
 
     <section class="card">
