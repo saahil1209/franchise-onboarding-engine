@@ -10,13 +10,16 @@ Everything runs in the visitor's browser tab, so:
 
 ## Files
 
+- **Step 1, where to open (Flow A):** `flowa.js` (the scoring engine: factors, guardrails, ranking, run comparison; no UI), `plan.js` (the profile form, results, refine and runs), `pinmap.js` (the PIN map), `data/pins.json` (PIN centroids; built by `../data/build-pins.mjs`, sources in `../data/SOURCES.md`).
+- `api/explain.js`, `api/_gemini.js`, `prompts/`, `numberguard.js`: Gemini explains the top picks; every number it writes is checked against the engine's (`numberGuard`). Needs `GEMINI_API_KEY` and `GEMINI_MODEL_FAST` in Vercel; without them the page shows the engine's own reasons.
+- **Step 2, applications (Case 1):**
 - `engine.js`: all the rules (reading the workbook, validation, gates, score, allocation, onboarding plans, follow-ups). It has no UI.
 - `dashboard.js`: the figures on the Home dashboard and the map (counts, pipeline, score bands, queue, onboarding, cities), built from the live decisions. No UI.
 - `map.js`: the territory map. Google Maps when the deployment provides a key; otherwise a drawn schematic of the cities.
 - `api/maps-config.js`: a Vercel function that gives the page the Maps key from the project's environment variables.
 - `app.js` and `index.html`: the page, in the glass design from `renders/glass/`. Views: Home, Applications, Territories, History & rules.
 - `sample.js`: a provisional 23-row test workbook built from the brief's column list. Every row plants one edge case. Used by the tests only; the page has no sample-data option.
-- `engine.test.js` and `dashboard.test.js`: the tests. Run them with `node --test`.
+- `*.test.js`: the tests. Run them with `npm install` once, then `node --test`. They never call Gemini or Google.
 
 ## Run locally
 
@@ -41,7 +44,16 @@ The folder is static, so any static host works. Two options:
 
 Before you share the link, open it in a private window and run the judge walkthrough below.
 
-## Judge walkthrough
+## Step 1 walkthrough
+
+1. Fill in the brand profile (name, industry, tier, existing store PINs, target states) and press **Get recommendations**.
+2. The ranked picks and the map show the recommended PINs, your stores and the minimum-distance rings. Click a pick for its factor breakdown, with each factor's source and confidence. Factors whose data isn't loaded say so.
+3. In **Refine and re-run**, exclude PINs or districts, add PINs you're considering, change weights, and re-run. Tick two runs to compare what changed and why.
+4. **Step 2: applications** opens the upload.
+
+What's loaded and what isn't: `../docs/DESIGN.md`.
+
+## Judge walkthrough (step 2)
 
 1. Upload the workbook.
 2. Home shows the headline figures, the territory map, who needs a person, and onboarding starts. Click a city on the map for its territories and ranked applicants. **Work through** opens the most urgent application.

@@ -1,6 +1,7 @@
 import { readWorkbook, decide, interpret, applyChanges, applyTerritoryChange, diff, why, nextHolds, summaryFacts, isWinner, CONFIG, FIELD_LABEL, STATUS_RANK, idNum } from './engine.js';
 import { overview, finding } from './dashboard.js';
 import { mountMap } from './map.js';
+import { initPlan, renderPlan, relayoutPlan } from './plan.js';
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -9,7 +10,7 @@ const chip = s => `<span class="tag s-${cls(s)}">${esc(s)}</span>`;
 const show = v => (v === null || v === undefined || v === '' ? '—' : v);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const STORE_KEY = 'franchise-session-v2';
-const VIEWS = ['home', 'applications', 'territories', 'history'];
+const VIEWS = ['plan', 'home', 'applications', 'territories', 'history'];
 
 // All state lives in this tab (and its sessionStorage, so a refresh keeps it).
 let S = null; // { name, apps, territories, stores, problems, held, history: [], undo: [] }
@@ -55,26 +56,29 @@ function save() {
 // ---------- views ----------
 function route() {
   const [v, arg] = decodeURIComponent(location.hash.slice(1)).split('/');
-  const view = VIEWS.includes(v) ? v : 'home';
+  // Step 1 is the plan; with no address the page opens there.
+  const view = VIEWS.includes(v) ? v : 'plan';
   if (view === 'territories' && arg && O?.cities.some(c => c.name === arg)) city = arg;
   if (view === 'applications' && arg && result?.decisions[arg]) selected = arg;
   return view;
 }
 function showView() {
   const view = route();
-  const loaded = !!S;
-  $('welcome').classList.toggle('hidden', loaded);
+  const loaded = !!S, plan = view === 'plan';
+  $('welcome').classList.toggle('hidden', loaded || plan);
   for (const el of document.querySelectorAll('.view')) {
-    // Before a workbook is loaded only the rules show, under the welcome card.
-    const on = loaded ? el.dataset.view === view : el.dataset.view === 'history';
+    // Before a workbook is loaded, the applications screens show the upload card and the rules.
+    const on = plan ? el.dataset.view === 'plan' : loaded ? el.dataset.view === view : el.dataset.view === 'history';
     el.classList.toggle('hidden', !on);
   }
   $('history').closest('section').classList.toggle('hidden', !loaded);
   for (const a of $('nav').querySelectorAll('a')) {
-    if (loaded && a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
-  $('nav').classList.toggle('hidden', !loaded); $('topsearch').classList.toggle('hidden', !loaded);
-  if (loaded) render();
+  $('topsearch').classList.toggle('hidden', !loaded || plan);
+  $('src').classList.toggle('hidden', plan);
+  if (plan) renderPlan().then(() => { relayoutPlan(); light(); });
+  else if (loaded) render();
   maps.home.relayout(); maps.full.relayout();
   light();
 }
@@ -460,4 +464,5 @@ try {
     showProblems(S.problems || []);
   }
 } catch { /* unreadable saved session: start fresh */ }
+initPlan({ go });
 showView();

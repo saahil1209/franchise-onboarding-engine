@@ -1,0 +1,9 @@
+{
+  "name": "incubeate-app",
+  "private": true,
+  "type": "module",
+  "description": "Case 1 MVP and Flow A: static page plus Vercel functions in api/.",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" },
+  "dependencies": { "@google/genai": "2.28.0" }
+}

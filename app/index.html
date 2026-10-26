@@ -207,11 +207,54 @@
   ul.hist { margin: 0; padding-left: 18px; } .hist li { margin-bottom: 6px; color: var(--muted); }
   footer { grid-column: span 12; color: var(--faint); font-size: 12.5px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 4px 4px 0; }
 
+
+  /* Plan (Flow A) */
+  form.profile { display: grid; gap: 18px; }
+  .fs { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px 16px; }
+  .fs legend { font-weight: 700; font-size: 15px; margin-bottom: 10px; padding: 0; }
+  .fld { display: grid; gap: 5px; font-size: 13px; color: var(--muted); font-weight: 600; min-width: 0; }
+  .fld.wide { grid-column: 1 / -1; }
+  .fld input:not([type=checkbox]):not([type=radio]):not([type=range]), .fld select, .fld textarea { font: inherit; font-weight: 500; color: var(--ink); height: 38px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--edge); background: var(--glass-strong); min-width: 0; }
+  .fld textarea { height: 64px; padding: 8px 10px; resize: vertical; }
+  .fld .hint { font-weight: 500; color: var(--faint); font-size: 12px; }
+  .radios { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; min-height: 38px; color: var(--ink); font-weight: 500; }
+  .states { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; max-height: 190px; overflow-y: auto; padding: 10px; border-radius: 12px; border: 1px solid var(--edge); background: var(--glass-strong); }
+  .states.off { opacity: .5; }
+  label.check { display: flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink); }
+  .formbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .status { color: var(--red); font-weight: 600; }
+  ol.picks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 560px; overflow-y: auto; }
+  .picks li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 2px 10px; padding: 11px 12px; border-radius: 12px; background: var(--tint); border: 1px solid var(--tint-2); cursor: pointer; }
+  .picks li.sel { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+  .picks li.consider .rk { background: var(--amber); }
+  .picks .rk { grid-row: span 3; width: 26px; height: 26px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12.5px; }
+  .picks .who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .picks .sc { font-weight: 700; font-variant-numeric: tabular-nums; } .picks .sc small { color: var(--faint); font-weight: 600; }
+  .picks .why { grid-column: 2 / -1; color: var(--muted); font-size: 12.5px; }
+  .picks .meta { grid-column: 2 / -1; }
+  tr.off td { color: var(--faint); }
+  tr.sel td { background: rgba(31, 95, 191, .07); }
+  .wts { display: grid; gap: 8px; }
+  label.wt { display: grid; grid-template-columns: minmax(0, 1fr) 140px 28px; gap: 10px; align-items: center; font-size: 13px; }
+  label.wt.off span { color: var(--faint); } label.wt em { font-style: normal; font-size: 12px; }
+  label.wt b { text-align: right; font-variant-numeric: tabular-nums; }
+  .chipx { border: 1px solid var(--edge); background: var(--tint); border-radius: 999px; padding: 2px 9px; font: inherit; font-size: 12.5px; cursor: pointer; color: var(--ink); }
+  .cmp { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--tint); border: 1px solid var(--tint-2); }
+  .cmp p { margin: 4px 0; }
+  .pmlayer { position: absolute; inset: 0; pointer-events: none; }
+  .pm { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; border: 2px solid #fff; border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; font: 700 12.5px var(--font); color: #fff; background: var(--blue); cursor: pointer; box-shadow: 0 4px 12px rgba(19, 33, 58, .25); padding: 0; }
+  .gmap .pm { position: relative; transform: none; }
+  .pm.sel { outline: 3px solid rgba(31, 95, 191, .45); outline-offset: 2px; z-index: 2; }
+  .pm-consider { background: var(--amber); }
+  .pm-store { width: 16px; height: 16px; border-radius: 4px; background: var(--ink); cursor: default; }
+  .pm-store .sq { display: none; }
+
   @media (max-width: 1180px) {
     .top .search { display: none; }
     .c8, .c4, .c5, .c7 { grid-column: span 12; }
     .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .kpi:nth-child(4) { border-left: 0; } .kpi:nth-child(n+4) { border-top: 1px solid var(--tint-2); }
     .sticky { position: static; max-height: none; }
+    label.wt { grid-template-columns: minmax(0, 1fr) 110px 28px; }
   }
   @media (max-width: 760px) {
     .top { flex-wrap: wrap; gap: 10px; top: 8px; }
@@ -234,7 +277,7 @@
 <header class="glass top">
   <a class="brand" href="#home"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2 19 6.5v9L11 20 3 15.5v-9z" fill="none" stroke="#13213a" stroke-width="1.6"/><path d="M11 11 19 6.5M11 11 3 6.5M11 11v9" stroke="#13213a" stroke-width="1.6"/><path d="M11 11 19 6.5v9L11 20z" fill="#1f5fbf"/></svg>InCubeAte</a>
   <nav class="links" aria-label="Main" id="nav">
-    <a href="#home" data-view="home">Home</a><a href="#applications" data-view="applications">Applications</a><a href="#territories" data-view="territories">Territories</a><a href="#history" data-view="history">History &amp; rules</a>
+    <a href="#plan" data-view="plan">Where to open</a><a href="#home" data-view="home">Home</a><a href="#applications" data-view="applications">Applications</a><a href="#territories" data-view="territories">Territories</a><a href="#history" data-view="history">History &amp; rules</a>
   </nav>
   <input class="search" id="topsearch" type="search" placeholder="Search applicants, PINs, territories" aria-label="Search applications">
   <label class="btn primary upload">Upload workbook<input class="file" type="file" accept=".xlsx,.xls,.csv"></label>
@@ -244,15 +287,85 @@
   <!-- Before a workbook is loaded -->
   <section class="glass hello c12" id="welcome" aria-labelledby="w-h">
     <div>
-      <div class="meta" id="date"></div>
-      <h1 id="w-h">Franchise onboarding</h1>
-      <p>Upload the applications workbook. Every applicant gets a status, the reason, the checks behind it and next steps. Ask about any decision or give new facts. Everything runs in this browser tab: nothing is sent to a server, and the session is kept only in this tab until you close it or press Start over.</p>
+      <div class="meta"><span id="date"></span> · Step 2 of 2</div>
+      <h1 id="w-h">Applications</h1>
+      <p>Upload the applications workbook. Every applicant gets a status, the reason, the checks behind it and next steps. Ask about any decision or give new facts. Applications are processed in this browser tab and never sent to a server; the session is kept only in this tab until you close it or press Start over.</p>
       <ul class="problems hidden" id="problems"></ul>
     </div>
     <div class="actions">
       <label class="btn primary">Upload Excel workbook<input class="file" type="file" accept=".xlsx,.xls,.csv"></label>
     </div>
   </section>
+
+
+  <!-- Step 1: where to open (Flow A) -->
+  <div class="view" data-view="plan">
+    <section class="glass card c12" id="plan-form-card" aria-labelledby="pf-h">
+      <header><div><div class="meta">Step 1 of 2</div><h1 id="pf-h" style="margin:4px 0 0">Tell us about your brand</h1></div><span class="meta">The platform recommends; your team decides. To explain the picks, the top locations and their scores (no applicant data) are sent to Gemini.</span></header>
+      <form class="profile" id="profile" novalidate>
+        <fieldset class="fs"><legend>Basics</legend>
+          <label class="fld">Brand name<input name="name" autocomplete="organization" required></label>
+          <label class="fld">Industry<select name="industry"></select></label>
+          <label class="fld">Price tier<select name="tier"><option>Value</option><option selected>Mid</option><option>Premium</option></select></label>
+          <label class="fld">Products<input name="products" placeholder="e.g. frames, lenses, sunglasses"></label>
+          <label class="fld">Investment per store (₹ lakh)<input name="investment" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label class="fld">Store size (sq ft)<span style="display:flex;gap:6px"><input name="minSqft" type="number" min="0" placeholder="min" aria-label="Minimum store size"><input name="maxSqft" type="number" min="0" placeholder="max" aria-label="Maximum store size"></span></label>
+          <label class="fld wide">Your existing stores (PIN codes)<textarea name="stores" placeholder="e.g. 560034, 560001, 110001"></textarea><span class="hint">New stores are kept away from these.</span></label>
+        </fieldset>
+        <fieldset class="fs"><legend>Goals</legend>
+          <label class="fld">New stores wanted<input name="newStores" type="number" min="1" max="50" value="5"></label>
+          <label class="fld">Timeline (months)<input name="timeline" type="number" min="1" max="60" value="12"></label>
+          <label class="fld">Priority<select name="priority"><option>Brand presence</option><option>Profitability</option><option>Speed</option></select></label>
+          <div class="fld">Target customers<div class="radios" role="radiogroup" aria-label="Urban or rural"><label><input type="radio" name="area" value="Urban" checked> Urban</label><label><input type="radio" name="area" value="Rural"> Rural</label><label><input type="radio" name="area" value="Both"> Both</label></div></div>
+          <label class="fld">Customer income<select name="income"><option>Low</option><option selected>Middle</option><option>High</option></select><span class="hint">Used once spending data is loaded.</span></label>
+          <label class="fld">Minimum distance between stores (km)<input name="minDistance" type="number" min="0" step="0.5" value="2"></label>
+          <div class="fld wide">Target regions <label class="check" style="margin:2px 0 6px"><input type="checkbox" name="anywhere"> Anywhere in India</label><div class="states" id="states"></div></div>
+          <label class="fld">Only these districts (optional)<input name="districts" placeholder="e.g. Bengaluru Urban, Mysuru"></label>
+          <label class="fld">Exclude (PINs or districts)<input name="exclude" placeholder="e.g. 560066, Mysuru"></label>
+        </fieldset>
+        <div class="formbar"><button class="btn primary">Get recommendations</button><button type="button" class="btn hidden" id="profile-cancel">Cancel</button><span class="status" id="profile-status" role="alert"></span></div>
+      </form>
+    </section>
+
+    <section class="glass hello c12 plan-results" aria-labelledby="plan-title">
+      <div><div class="meta" id="plan-meta"></div><h1 id="plan-title"></h1><p id="plan-summary"></p></div>
+      <div class="actions"><button class="btn" id="plan-edit">Edit profile</button><button class="btn primary" id="plan-continue">Step 2: applications →</button></div>
+    </section>
+    <section class="glass card c7 mapcard plan-results" aria-labelledby="pm-h">
+      <header><h2 id="pm-h">Recommended PINs</h2><span class="meta">click a marker for its breakdown</span></header>
+      <div class="map" id="pin-map" style="min-height:520px"></div>
+      <div class="maplegend"><span><i style="background:var(--blue)"></i>Recommended (rank)</span><span><i style="background:var(--amber)"></i>You're considering</span><span><i style="background:var(--ink);border-radius:3px"></i>Your store</span><span><i style="border:1.5px dashed var(--red);width:9px;height:9px"></i>Minimum distance</span><span data-map-note>PIN centroids from the All India Pincode Directory</span></div>
+    </section>
+    <section class="glass card c5 plan-results" aria-labelledby="pk-h">
+      <header><h2 id="pk-h">Ranked picks</h2><span class="meta" id="picks-n"></span></header>
+      <ol class="picks" id="picks"></ol>
+    </section>
+    <section class="glass card c7 plan-results" id="pick-detail" aria-live="polite"></section>
+    <section class="glass card c5 plan-results" aria-labelledby="mi-h">
+      <header><h2 id="mi-h">What would sharpen this</h2></header>
+      <div id="missing"></div>
+    </section>
+    <section class="glass card c7 plan-results" aria-labelledby="rf-h">
+      <header><h2 id="rf-h">Refine and re-run</h2><span class="meta">each run is saved</span></header>
+      <form id="refine" class="profile">
+        <div class="fs">
+          <label class="fld">Exclude more (PINs or districts)<input name="exclude" placeholder="e.g. 560076, Tumakuru"></label>
+          <label class="fld">Add PINs you're considering<input name="consider" placeholder="e.g. 560102"></label>
+          <label class="fld">New stores wanted<input name="newStores" type="number" min="1" max="50"></label>
+          <label class="fld">Minimum distance (km)<input name="minDistance" type="number" min="0" step="0.5"></label>
+          <div class="fld">Target customers<div class="radios"><label><input type="radio" name="rarea" value="Urban"> Urban</label><label><input type="radio" name="rarea" value="Rural"> Rural</label><label><input type="radio" name="rarea" value="Both"> Both</label></div></div>
+          <label class="fld">What are you trying? (optional)<input name="note" placeholder="e.g. Skip central Bengaluru"></label>
+        </div>
+        <p class="meta" id="excluded"></p>
+        <div><h3 class="sub" style="margin-top:0">Factor weights <span class="meta">(relative; factors not loaded don't count)</span></h3><div class="wts" id="weights"></div></div>
+        <div class="formbar"><button class="btn primary">Re-run recommendations</button></div>
+      </form>
+    </section>
+    <section class="glass card c5 plan-results" aria-labelledby="rn-h">
+      <header><h2 id="rn-h">Runs</h2><span class="meta">compare what changed</span></header>
+      <div id="runs" class="scroll"></div>
+    </section>
+  </div>
 
   <!-- Home -->
   <div class="view" data-view="home">

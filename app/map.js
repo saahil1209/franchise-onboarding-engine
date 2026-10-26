@@ -12,7 +12,10 @@ let googleReady = null;
 const authFailed = new Set();
 let authFailure = null;
 window.gm_authFailure = () => { authFailure = 'Google rejected the Maps key'; for (const f of authFailed) f(); };
+// Register a callback for a rejected key; it runs at once if Google has already rejected it.
+export function onGoogleFailure(f) { authFailed.add(f); if (authFailure) f(); }
 export function loadGoogle() {
+  if (authFailure) return Promise.reject(new Error(authFailure));
   if (googleReady) return googleReady;
   googleReady = (async () => {
     const r = await fetch('api/maps-config', { cache: 'no-store' });

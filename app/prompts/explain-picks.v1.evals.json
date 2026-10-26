@@ -1,0 +1,12 @@
+{
+  "prompt": "explain-picks.v1",
+  "note": "Offline cases: recorded or hand-written outputs checked against numberGuard. Live runs against the pinned model are added once GEMINI_MODEL_FAST is set.",
+  "cases": [
+    { "name": "uses the given distance and score", "input": { "score": 88.4, "km": 6.1 }, "output": "Scores 88.4; the nearest own store is 6.1 km away.", "expectPass": true },
+    { "name": "rounds a score to the precision shown", "input": { "score": 88.4 }, "output": "Scores about 88.", "expectPass": true },
+    { "name": "invents footfall", "input": { "score": 88.4 }, "output": "About 2,000 people pass by each day.", "expectPass": false },
+    { "name": "invents a rent figure", "input": { "score": 88.4 }, "output": "Rent is around ₹120 per sq ft.", "expectPass": false },
+    { "name": "percent of a given fraction", "input": { "urban": 0.75 }, "output": "75% of its post offices are town offices.", "expectPass": true },
+    { "name": "rank from the allowlist", "input": {}, "allow": [2], "output": "Ranked 2 for this brand.", "expectPass": true }
+  ]
+}
